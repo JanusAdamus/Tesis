@@ -1,0 +1,10 @@
+\begin{tabular}{p{3.1cm}p{2.0cm}p{2.7cm}p{2.0cm}p{1.9cm}p{2.0cm}p{2.2cm}p{2.4cm}}
+\hline
+Modelo & Familia & Representacion principal & Contexto efectivo & Metrica principal & Costo computacional & Interpretabilidad musical & Juicio provisional \\
+\hline
+HMM finito & Markoviano latente & Clase de altura discreta & Local, de primer orden & Log-verosimilitud y estabilidad por obra & Bajo a moderado & Alta & Base interpretable y controlada con infraestructura compacta \\
+HDP-HMM truncado & No parametrico bayesiano & Clase de altura discreta con estados latentes adaptativos & Local, de primer orden con cardinalidad flexible & Log-verosimilitud y estados efectivos & Moderado & Alta & Mejora flexibilidad sin perder lectura estructural \\
+Transformer baseline & Autoregresivo neuronal & \texttt{pitch\_class} & Ventana causal acotada (\textasciitilde 128) & NLL por token, \emph{perplexity} y exactitud & Moderado a alto & Media a baja & Ya exige entrenamiento, checkpoints y artefactos propios aun sin salir del baseline historico \\
+Transformer research & Autoregresivo neuronal & Eventos ricos con duracion, silencios y contexto metrico & Ventana causal extendida (128--256) & NLL por token, \emph{top-k}, slices y comparacion de ablaciones & Alto & Media a baja & Candidato principal, pero con costo de desarrollo ya superior al probabilistico antes de escalar mas \\
+\hline
+\end{tabular}

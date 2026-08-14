@@ -1,0 +1,119 @@
+\chapter{Comparación final entre HMM, HDP-HMM y Transformer}
+\label{chap:comparacion-final}
+
+Los capítulos anteriores desarrollaron dos familias de modelos probabilísticos para análisis musical simbólico. Por una parte, el HMM finito proporcionó un marco interpretable para describir la relación entre estados latentes y secuencias observables. Por otra, el HDP-HMM permitió relajar la fijación \emph{a priori} del número de estados y ofreció una alternativa no paramétrica para capturar una estructura latente más flexible. El paso natural que sigue consiste en contrastar estos enfoques con una familia distinta de modelos secuenciales: los transformadores causales aplicados a predicción del siguiente evento musical.
+
+La motivación de este capítulo no es asumir desde el inicio que el transformador deba reemplazar a los modelos markovianos. El problema relevante es más preciso. Si los transformadores exigen una infraestructura experimental más amplia, mayor costo de cómputo, decisiones de representación más delicadas y una validación más extensa, entonces la comparación adecuada no debe limitarse a una sola métrica predictiva. La pregunta central es si ese incremento de complejidad produce una mejora sustancial, consistente y metodológicamente defendible para el análisis musical considerado en esta tesis.
+
+Este capítulo se concibe como un capítulo de cierre comparativo. Su función es integrar, en un mismo marco, cuatro dimensiones que suelen evaluarse por separado: capacidad predictiva, costo computacional, costo de desarrollo e interpretabilidad analítica. En lugar de tratar la comparación como una oposición simplista entre ``modelo clásico'' y ``modelo moderno'', se propone una evaluación balanceada de compromisos. El HMM y el HDP-HMM parten de una estructura latente explícita y musicalmente interpretable; el transformador, en cambio, desplaza parte de la carga modelística hacia la representación de entrada, la escala de entrenamiento y la capacidad del modelo para explotar dependencias de contexto más largas.
+
+La utilidad de una comparación de este tipo es doble. Desde el punto de vista metodológico, permite decidir si la ampliación de infraestructura justifica su incorporación al programa de investigación. Desde el punto de vista sustantivo, permite determinar si la mejora cuantitativa del transformador, en caso de aparecer, va acompañada de una ganancia real para la comprensión del fenómeno musical y no sólo de un aumento de capacidad estadística difícil de interpretar.
+
+\section{Pregunta de comparación y criterio de decisión}
+
+La pregunta guía de este capítulo puede formularse así:
+\begin{quote}
+\emph{¿La complejidad adicional requerida por un transformador causal para modelar secuencias musicales simbólicas produce una mejora suficiente frente al HMM finito y al HDP-HMM truncado como para justificar su adopción dentro de esta línea de trabajo?}
+\end{quote}
+
+Responder esta pregunta exige evitar dos reduccionismos. El primero consiste en juzgar los modelos únicamente por su costo computacional, lo cual invisibiliza posibles mejoras reales en calidad predictiva o cobertura estructural. El segundo consiste en juzgarlos únicamente por la métrica final, como si una mejora marginal de \emph{perplexity} bastara para justificar un ecosistema experimental mucho más costoso y opaco. En esta tesis se adopta una posición intermedia: la comparación debe ser cuantitativa, pero también debe ser metodológicamente legible.
+
+El criterio de decisión que guiará el análisis comparativo se articula en torno a cinco preguntas:
+\begin{enumerate}
+    \item ¿Qué modelo ofrece la mejor calidad predictiva global bajo condiciones de entrenamiento y evaluación comparables?
+    \item ¿En qué subconjuntos del corpus se observan las mejoras y con qué estabilidad aparecen?
+    \item ¿Qué costo computacional adicional exige cada mejora observada?
+    \item ¿Qué costo de implementación, mantenimiento y experimentación requiere cada familia de modelos?
+    \item ¿Qué tan interpretable sigue siendo el resultado desde el punto de vista musical?
+\end{enumerate}
+
+Estas preguntas delimitan una comparación costo-beneficio, no una competencia aislada de rendimiento.
+
+\section{Dimensiones de costo relevantes}
+
+Para comparar tecnologías de modelado secuencial en este contexto no basta medir tiempo total de entrenamiento. El costo aparece en varias capas, y cada una tiene consecuencias distintas para la práctica investigativa. En este capítulo se distinguen cinco dimensiones.
+
+Primero, el \emph{costo de implementación} describe la cantidad de infraestructura adicional necesaria para poner en marcha una línea experimental. En los modelos HMM y HDP-HMM, buena parte del trabajo se concentra en fijar el espacio observable, la estructura latente y los procedimientos de inferencia. En el caso del transformador, el costo incluye además el diseño de representaciones simbólicas, perfiles de entrenamiento, trazabilidad de corridas, agregación de resultados, manejo de contextos y selección de hiperparámetros.
+
+Segundo, el \emph{costo de experimentación} se refiere a la cantidad de corridas, ajustes y validaciones necesarias para llegar a un resultado confiable. Un HMM finito puede evaluarse con un número relativamente controlado de configuraciones. Un transformador, en cambio, suele requerir comparar representación, longitud de contexto, tamaño del modelo, regularización, estrategia de muestreo y criterios de selección de checkpoints.
+
+Tercero, el \emph{costo computacional} incluye tiempo de ajuste, tiempo de evaluación, memoria, dependencia de hardware especializado y sensibilidad a la escala del corpus. Esta dimensión es importante porque una mejora cuantitativa modesta puede resultar poco defendible si sólo aparece a costa de un aumento pronunciado del presupuesto experimental.
+
+Cuarto, el \emph{costo epistémico} alude a la pérdida potencial de interpretabilidad. Un HMM o un HDP-HMM permiten asociar estados latentes, transiciones y emisiones con hipótesis musicales identificables. Un transformador puede mejorar predicción sin ofrecer una estructura latente directamente comparable. La cuestión no es si esto lo invalida, sino cuánto encarece la tarea de justificar sus resultados en términos musicales.
+
+Quinto, el \emph{costo de mantenimiento} describe la dificultad de sostener el pipeline a lo largo del tiempo. Un sistema experimental con muchos perfiles, scripts de agregación, artefactos de benchmarking y decisiones de infraestructura requiere más disciplina de documentación y más trabajo para conservar reproducibilidad.
+
+En el estado actual del proyecto, este costo ya puede registrarse de manera concreta y no sólo con carácter hipotético. Para sostener la línea del transformador fue necesario separar explícitamente un \emph{baseline} conservador en CPU y un \emph{track} de investigación, introducir una representación simbólica más rica con silencios y posición métrica, incorporar sesgo posicional relativo, habilitar una ruta de atención acelerada con retorno seguro a la implementación conservadora y ampliar la batería de pruebas y de reportes reproducibles. Además, la comparación ya no se reduce a una corrida única: exige una suite canónica de corridas \emph{baseline} frente a \emph{research}, así como ablaciones de representación, posición y longitud de contexto. Nada de esto invalida al transformador, pero sí vuelve visible un hecho metodológico importante: aun antes de demostrar una mejora predictiva sustancial, la familia neuronal ya impone un costo de desarrollo y de mantenimiento claramente mayor que el requerido por los modelos probabilísticos.
+
+\section{Diseño de comparación}
+
+La comparación entre HMM, HDP-HMM y transformador se organizará sobre una batería canónica de corridas, construida para evitar evaluaciones anecdóticas. En el caso del transformador, esta batería debe distinguir explícitamente entre corridas de validación rápida y corridas destinadas a análisis formal. La batería actual ya puede describirse en dos capas:
+\begin{enumerate}
+    \item una capa histórica de referencia, formada por \texttt{cpu\_baseline\_smoke}, \texttt{cpu\_baseline\_full}, \texttt{research\_richer\_events\_smoke} y \texttt{research\_richer\_events\_full};
+    \item una capa de ablaciones controladas, que separa representación, posición y contexto mediante familias específicas de corridas.
+\end{enumerate}
+
+En particular, la familia \texttt{research\_pitch\_duration} aísla el efecto de la representación; la familia \texttt{research\_richer\_events\_absolute} contrasta posición absoluta contra sesgo relativo; y la familia \texttt{research\_richer\_events\_context128} compara contexto corto frente a contexto extendido. Esta nomenclatura permite congelar comparaciones con semillas, representación, presupuesto y propósito claramente definidos.
+
+El valor metodológico de este manifiesto canónico es que separa tres niveles de trabajo: pruebas de integridad del pipeline, corridas comparables y exploración abierta. Sólo el segundo nivel debe alimentar las tablas de resultados principales de este capítulo. De este modo, se evita confundir experimentos exploratorios con evidencia central.
+
+La integración entre el repositorio experimental y la tesis se apoyará en tres tipos de artefactos:
+\begin{enumerate}
+    \item un manifiesto de corridas canónicas;
+    \item una tabla consolidada de resultados en formatos estructurados;
+    \item una síntesis en tablas y discusión escrita para interpretación final.
+\end{enumerate}
+
+La información procedente del transformador deberá reportarse, al menos, en términos de \emph{negative log-likelihood} por token, \emph{perplexity}, exactitud, exactitud \emph{top-k}, longitud de contexto, tamaño del modelo, sesgo posicional relativo, implementación de atención solicitada, ruta efectiva de atención utilizada y tiempo total de ejecución. Para HMM y HDP-HMM, la comparación se apoyará en log-verosimilitud, complejidad efectiva del espacio latente, estabilidad entre obras y claridad interpretativa. Esta asimetría en las variables reportadas no es accidental: expresa precisamente que el costo del transformador no se agota en entrenar un modelo más grande, sino que incluye decidir y documentar qué representación, qué contexto y qué ruta de cómputo resultan defendibles.
+
+\section{Tablas base de comparación}
+
+Las tablas siguientes se introducen como estructura base para consolidar evidencia. En esta etapa funcionan como plantillas de trabajo para ser actualizadas conforme se integren corridas comparables del repositorio experimental. Su función no es cerrar todavía la discusión, sino fijar desde ahora el formato en el que se evaluará la relación entre mejora y costo.
+
+\begin{table}[H]
+\centering
+\caption{Resumen comparativo base entre familias de modelos}
+\label{tab:chapter4-model-comparison-summary}
+\resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_model_comparison_summary}}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Comparación de costo de infraestructura y experimentación}
+\label{tab:chapter4-infrastructure-cost-comparison}
+\resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_infrastructure_cost_comparison}}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Comparación base entre representaciones musicales}
+\label{tab:chapter4-representation-comparison}
+\resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_representation_comparison}}
+\end{table}
+
+\section{Hipótesis de trabajo para la comparación final}
+
+Antes de completar las tablas con resultados definitivos, conviene explicitar las hipótesis provisionales que orientan la lectura comparativa. La primera es que el transformador puede superar a los modelos markovianos en tareas de predicción local cuando dispone de una representación suficientemente rica y de un contexto más amplio que el utilizado por los modelos basados en estados latentes discretos. La segunda es que esa posible mejora no será gratuita: dependerá de una infraestructura experimental claramente más costosa.
+
+La tercera hipótesis es que el HDP-HMM conserva una ventaja significativa en interpretabilidad estructural. Incluso si un transformador logra mejores métricas de predicción, todavía habrá que valorar si ese incremento compensa la pérdida de una representación latente más directamente legible en términos armónicos o contextuales. La cuarta hipótesis es que la diferencia entre tecnologías no debe interpretarse como una sustitución absoluta. Es posible que cada familia de modelos resulte preferible para distintos objetivos: explicación estructural, predicción secuencial, análisis exploratorio o escalamiento a corpus más grandes. La quinta hipótesis, sugerida ya por el estado actual del repositorio, es que el principal cuello de botella del transformador no aparece primero en el número de parámetros, sino en la proliferación controlada de decisiones metodológicas: representación, longitud de contexto, sesgo posicional, ruta de atención y batería de ablaciones comparables.
+
+\section{Ruta de actualización de este capítulo}
+
+Este capítulo está diseñado para actualizarse de manera incremental conforme avance la línea experimental del transformador. La secuencia prevista de integración es la siguiente:
+\begin{enumerate}
+    \item consolidar una batería de corridas canónicas comparables;
+    \item generar tablas únicas de resultados en formatos estructurados;
+    \item producir un primer análisis formal \emph{baseline} frente a \emph{research};
+    \item estudiar por separado el efecto de la representación musical;
+    \item evaluar el efecto de extender la longitud de contexto;
+    \item estudiar por separado el costo de cambiar la ruta de atención sin alterar la arquitectura básica;
+    \item sólo después considerar mayor escala o cambios de arquitectura.
+\end{enumerate}
+
+Este orden no es accidental. Antes de aumentar el tamaño del modelo o introducir nuevas variantes arquitectónicas, es necesario resolver si las mejoras actuales provienen realmente de una mejor representación y de una evaluación más rigurosa, o si sólo reflejan un aumento indiscriminado de capacidad. En otras palabras, el crecimiento del sistema experimental sólo será defendible si produce evidencia comparativa clara frente a la línea HMM/HDP-HMM ya desarrollada en esta tesis.
+
+\section{Alcance del capítulo}
+
+En su versión actual, este capítulo deja establecida la estructura conceptual y documental de la comparación final. Aún no pretende presentar una conclusión cerrada sobre la superioridad de una familia de modelos, sino preparar un espacio formal donde los resultados puedan incorporarse sin ambigüedad metodológica. Esta decisión es deliberada: antes de afirmar que el transformador ofrece una mejora sustancial, conviene hacer explícito desde ahora qué evidencia sería suficiente para sostener esa afirmación y bajo qué costos tendría sentido aceptarla.
+
+Con ello, la tesis gana un marco de cierre más exigente. La discusión final ya no dependerá únicamente de qué modelo obtiene el mejor número, sino de cuál ofrece la mejor relación entre calidad predictiva, costo experimental e inteligibilidad musical.

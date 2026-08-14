@@ -1,0 +1,9 @@
+\begin{tabular}{p{3.0cm}p{3.0cm}p{2.7cm}p{2.8cm}p{2.9cm}p{2.8cm}}
+\hline
+Representacion & Informacion conservada & Capacidad estructural esperada & Complejidad de implementacion & Riesgo metodologico & Uso sugerido \\
+\hline
+Clase de altura (\texttt{pitch\_class}) & Altura modular sin duracion explicita & Baja a moderada & Baja & Puede simplificar en exceso el problema musical & Baseline minimo y comparacion historica \\
+Clase de altura con duracion & Altura y duracion discretizada & Moderada & Moderada & Dependencia fuerte de la cuantizacion temporal y ausencia de silencios explicitos & Ablacion formal de representacion contra el modelo rico \\
+Evento con duracion y contexto metrico & Altura, silencio, duracion y posicion metrica & Moderada a alta & Moderada a alta & Aumenta vocabulario, exige control de \emph{sparsity} y amplia el costo de validacion & Principal candidata para track research y para justificar si la mejora compensa el costo \\
+\hline
+\end{tabular}

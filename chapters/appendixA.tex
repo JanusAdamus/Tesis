@@ -1,0 +1,61 @@
+\chapter{Complementos teóricos y posibles direcciones}
+
+\section{Sobre el proceso de Dirichlet y los modelos jerárquicos}
+
+El capítulo 3 introduce el proceso de Dirichlet en el punto en que hace falta para definir el modelo. Lo que se reúne aquí es un paso previo: no la formulación del HDP-HMM, sino la cadena de ideas que vuelve natural su aparición. Esa cadena puede resumirse así. Una distribución categórica describe probabilidades sobre un conjunto finito de símbolos. La distribución de Dirichlet permite modelar incertidumbre sobre esas probabilidades. Un modelo jerárquico permite poner en relación varias distribuciones del mismo tipo sin estimarlas por separado. El proceso de Dirichlet aparece cuando se quiere conservar esa lógica, pero sin fijar de antemano el número de categorías latentes \cite{murphy2012,ferguson1973,teh2006}.
+
+Sea $\mathcal V=\{1,\dots,K\}$ un conjunto finito. Una variable aleatoria $Y$ con valores en $\mathcal V$ sigue una distribución categórica si existe un vector de probabilidades
+\[
+\mathbf{p}=(p_1,\dots,p_K),\qquad p_k\ge 0,\qquad \sum_{k=1}^K p_k=1,
+\]
+tal que
+\[
+P(Y=k\mid \mathbf{p})=p_k.
+\]
+El vector $\mathbf{p}$ pertenece al simplex de dimensión $K-1$ y expresa, simplemente, el peso asignado a cada categoría posible. Si se observa una sola realización, la estructura parece elemental. Pero cuando se observan muchas realizaciones y se desea inferir el valor de $\mathbf{p}$, ya no interesa sólo contar frecuencias: también importa cómo representar la incertidumbre sobre esas frecuencias.
+
+La distribución de Dirichlet cumple esa función. Se escribe
+\[
+\mathbf{p}\sim \mathrm{Dirichlet}(a_1,\dots,a_K),
+\]
+y define una distribución de probabilidad sobre el conjunto de todos los vectores $\mathbf{p}$ admisibles. Los parámetros $(a_1,\dots,a_K)$ controlan la concentración de masa en el simplex: si todos son grandes, la distribución se concentra más; si son pequeños, permite configuraciones más extremas. En términos intuitivos, la distribución de Dirichlet actúa como un prior sobre probabilidades categóricas.
+
+Su importancia práctica proviene de la conjugación. Si se observa una muestra de variables categóricas con conteos
+\[
+(n_1,\dots,n_K),
+\]
+entonces la distribución posterior de $\mathbf{p}$ vuelve a ser Dirichlet:
+\[
+\mathbf{p}\mid \text{datos}\sim
+\mathrm{Dirichlet}(a_1+n_1,\dots,a_K+n_K).
+\]
+Esta propiedad hace que la actualización bayesiana sea particularmente transparente. Cada conteo observado corrige el peso previo asociado a su categoría, y el resultado sigue viviendo en la misma familia de distribuciones. Por eso la Dirichlet puede entenderse como una forma de regularizar probabilidades discretas sin abandonar una interpretación probabilística clara.
+
+La dificultad aparece cuando una sola distribución ya no basta. En muchos problemas no se tiene un único vector de probabilidades, sino varios. En un modelo de secuencias, por ejemplo, puede haber una distribución distinta para cada contexto. Si se estimaran todas de manera independiente, el modelo perdería dos cosas a la vez: estabilidad estadística y estructura común. La primera se pierde porque contextos con pocos datos producirían estimaciones demasiado ruidosas. La segunda se pierde porque ya no habría un mecanismo que recogiera similitudes globales entre las distribuciones locales.
+
+Aquí entra la idea de modelo jerárquico. En general, un modelo jerárquico es aquel en el que ciertos parámetros no se fijan de una vez por todas, sino que a su vez son tratados como variables aleatorias gobernadas por un nivel superior. La ganancia conceptual es que el modelo deja de ser una colección de piezas aisladas: los parámetros locales quedan acoplados por una estructura común. En vez de estimar cada distribución como si nada la conectara con las demás, se admite que todas proceden de una misma organización global.
+
+En el caso finito, esta idea puede escribirse así. Se introduce primero una distribución global
+\[
+\mathbf{p}^{(0)}\sim \mathrm{Dirichlet}(b_1,\dots,b_K),
+\]
+y después se definen distribuciones locales
+\[
+\mathbf{p}^{(j)}\mid \mathbf{p}^{(0)}
+\sim
+\mathrm{Dirichlet}(\lambda p^{(0)}_1,\dots,\lambda p^{(0)}_K),
+\qquad j=1,\dots,m.
+\]
+Aquí $\mathbf{p}^{(0)}$ fija un perfil global, mientras que cada $\mathbf{p}^{(j)}$ representa una distribución local que puede apartarse de él, aunque no de manera arbitraria. El parámetro $\lambda$ regula cuánta fidelidad guardan los niveles locales respecto del nivel global. Cuando $\lambda$ es grande, las distribuciones locales tienden a parecerse más entre sí; cuando es pequeño, hay mayor libertad para que diverjan.
+
+Ésta es la razón por la cual los modelos jerárquicos resultan relevantes en problemas de este tipo. En un HMM, por ejemplo, no hay una sola distribución discreta: hay una distribución inicial, varios renglones de una matriz de transición y, según la formulación, varias distribuciones de emisión. Todas ellas describen comportamientos locales, pero no conviene tratarlas como objetos completamente inconexos. Una estructura jerárquica permite compartir información entre esos niveles locales, suavizar estimaciones pobres y conservar una idea común del repertorio latente disponible. En la literatura bayesiana esto suele describirse como \emph{partial pooling}: ni independencia total entre contextos ni colapso forzado a una sola distribución.
+
+Hasta aquí, sin embargo, todo sigue dependiendo de un supuesto fuerte: el número de categorías $K$ es finito y conocido. La distribución de Dirichlet resuelve la incertidumbre sobre un vector de probabilidades cuando ese vector ya tiene dimensión fija. Pero si el problema exige permitir que el número de componentes latentes no esté prefijado, entonces la construcción finita deja de ser suficiente. Lo que se necesita ya no es una distribución sobre vectores de dimensión fija, sino una distribución sobre medidas de probabilidad.
+
+Ése es precisamente el paso que da el proceso de Dirichlet \cite{ferguson1973}. En lugar de asignar un prior a un vector finito $\mathbf{p}$, asigna un prior a una medida aleatoria $G$. La intuición es la misma que en el caso finito: se sigue modelando incertidumbre sobre pesos probabilísticos. Lo que cambia es que ahora el repertorio de átomos potenciales no tiene por qué fijarse de antemano mediante un entero $K$. Bajo esta formulación, el espacio de componentes latentes puede ampliarse con la complejidad exigida por los datos.
+
+Además, una propiedad central del proceso de Dirichlet es que sus realizaciones son casi seguramente discretas, incluso cuando la medida base no lo sea. En consecuencia, puede pensarse como una medida de probabilidad construida a partir de una familia numerable de átomos con pesos aleatorios. La representación de \emph{stick-breaking} introducida por Sethuraman expresa esta idea de manera explícita \cite{sethuraman1994}: la masa total se reparte sucesivamente en una colección numerable de porciones, generando así una medida discreta aleatoria.
+
+El paso jerárquico se conserva. Así como en el caso finito una distribución global organizaba a las distribuciones locales, en el caso no paramétrico una medida global puede servir de referencia para varias medidas locales. La relevancia de este punto para el capítulo 3 es directa: cuando se desea modelar una familia de distribuciones de transición relacionadas entre sí, pero sin imponer un número fijo de estados latentes, hace falta una construcción que combine dos exigencias. Por un lado, permitir un repertorio potencialmente infinito. Por otro, conservar una estructura común entre las distribuciones locales. El proceso de Dirichlet jerárquico responde justamente a esas dos exigencias \cite{teh2006}.
+
+Bajo esta luz, la función del proceso de Dirichlet y de los modelos jerárquicos no consiste en introducir una sofisticación externa al problema musical, sino en resolver una dificultad concreta de modelado. Cuando la complejidad latente no puede fijarse de manera convincente y, al mismo tiempo, varias distribuciones deben compartir información estructural, la jerarquía bayesiana y el paso no paramétrico dejan de ser un lujo formal y se convierten en una herramienta natural.

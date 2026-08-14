@@ -1,0 +1,59 @@
+% !TEX TS-program = xelatex
+
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{Dissertate}
+
+\usepackage{tikz}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{float}      % para [H]
+\usepackage{placeins}   % para \FloatBarrier
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposición}[chapter]
+\newtheorem{Definicion}{Definicion}
+\newtheorem{observacion}{Observación}[chapter]
+\theoremstyle{remark}
+\newtheorem{remark}{Observación}[chapter]
+
+\usepackage{comment}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\begin{document}
+
+
+\onehalfspacing
+
+\setlength{\parskip}{0.5em}
+\emergencystretch=2em
+
+\input{frontmatter/personalize}
+
+\frontmatter
+
+    \setcounter{chapter}{0}
+    \include{chapters/chapter0}
+    \include{chapters/chapter1}
+    \include{chapters/chapter2}
+    \include{chapters/chapter3}
+    \include{chapters/chapter4}
+   \phantomsection
+   \addcontentsline{toc}{chapter}{Apéndice A}
+   \hypertarget{apendiceA}{}
+
+   \phantomsection
+   \addcontentsline{toc}{chapter}{Apéndice B}
+   \hypertarget{apendiceB}{}
+
+    \backmatter
+
+    \printindex[analytic]
+    \addcontentsline{toc}{chapter}{Índice Analítico}
+
+\newpage
+ \thispagestyle{empty}
+ \include{endmatter/colophon}
+
+\end{document}

@@ -1,0 +1,56 @@
+\chapter{Diseño computacional del sistema de modelado musical}
+\label{chap:design}
+
+La tesis tiene una dimensión matemática evidente, pero también una dimensión de diseño. No basta con proponer modelos; hace falta decidir qué sistema conviene construir para analizar música simbólica bajo restricciones reales de datos, cómputo e interpretación. Este capítulo recoge esa segunda pregunta. Su función es explicitar el problema de diseño que subyace al resto del trabajo y fijar los criterios con los que se compararán soluciones clásicas y modernas.
+
+\section{Definición del problema de diseño}
+
+El problema de diseño consiste en construir un sistema computacional para música simbólica que permita representar secuencias discretas, modelar regularidades melódicas y armónicas, e introducir una comparación controlada entre familias de modelos con distinta complejidad. En términos musicales, interesa describir una estructura que no siempre aparece de manera explícita en la partitura; en términos computacionales, interesa decidir qué arquitectura permite hacerlo con mejor equilibrio entre ajuste, costo e inteligibilidad.
+
+La pregunta central no es sólo qué modelo ajusta mejor, sino qué complejidad resulta defendible para el tipo de corpus y de objetivo analítico que esta tesis adopta. El problema, por tanto, no se reduce a entrenar algoritmos, sino a diseñar un sistema comparativo capaz de mostrar cuándo una solución más expresiva aporta una ventaja real y cuándo simplemente añade complejidad.
+
+\section{Requerimientos funcionales y no funcionales}
+
+En el plano funcional, el sistema debe aceptar entradas simbólicas en formatos estándar, convertirlas a una representación discreta común y permitir el entrenamiento y la evaluación de varios modelos sobre el mismo corpus. También debe producir salidas comparables: trayectorias inferidas, medidas de ajuste, resultados predictivos y estimaciones básicas de costo computacional.
+
+En el plano no funcional, hay cuatro exigencias principales. La primera es la reproducibilidad: el procedimiento debe poder repetirse sobre los mismos datos y con la misma configuración experimental. La segunda es la interpretabilidad: en un problema musical no basta con predecir bien; también importa que el comportamiento del modelo conserve una lectura razonable. La tercera es la modularidad, para que el cambio de arquitectura no obligue a rehacer el pipeline completo. La cuarta es la economía computacional, entendida en relación con el alcance real de una tesis y no con condiciones de laboratorio industrial.
+
+\section{Restricciones realistas del entorno}
+
+Las restricciones del entorno son parte del problema y no un obstáculo exterior a él. La primera es el tamaño del corpus: en música simbólica, una tesis trabaja normalmente con colecciones pequeñas o medianas, no con volúmenes de datos propios de aplicaciones masivas. La segunda es la naturaleza de la representación: archivos como MIDI o MusicXML requieren normalización y discretización, y toda discretización supone una pérdida de información.
+
+La tercera restricción es computacional. El diseño debe poder ejecutarse con recursos acotados y tiempos compatibles con el calendario de trabajo. La cuarta es interpretativa: en esta tesis no interesa sólo la capacidad predictiva, sino también si la estructura aprendida admite una lectura musical defendible. Esa exigencia vuelve menos atractivas las soluciones cuya expresividad depende de una opacidad excesiva.
+
+\section{Estándares y regulaciones relevantes para el diseño}
+
+El sistema no pertenece a un ámbito fuertemente regulado, pero sí debe respetar ciertos estándares y límites. En primer lugar, conviene trabajar con formatos simbólicos interoperables, en particular MIDI y MusicXML, para evitar que el problema dependa de codificaciones propietarias o difíciles de reproducir. En segundo lugar, el corpus y las bibliotecas empleadas están sujetos a condiciones de licenciamiento y de uso académico que no pueden ignorarse. En tercer lugar, la reproducibilidad experimental funciona aquí como un estándar metodológico: deben quedar trazables los datos usados, las transformaciones aplicadas y la configuración de cada experimento.
+
+\section{Alternativas consideradas}
+
+La primera alternativa es el HMM finito. Su fuerza está en la claridad de la formulación y en la interpretabilidad de los estados; su límite está en que obliga a fijar por adelantado la complejidad del espacio latente. La segunda es el HDP-HMM truncado, que conserva el marco probabilístico del HMM pero flexibiliza el número efectivo de estados. Gana en adaptabilidad, aunque al precio de una inferencia más delicada.
+
+La tercera alternativa es un modelo basado en atención, por ejemplo un Transformer pequeño para secuencias simbólicas. Su interés radica en que puede capturar dependencias largas sin imponer explícitamente una estructura markoviana. Pero esa expresividad trae consigo un mayor costo computacional y una pérdida de legibilidad. También sería posible una solución híbrida, aunque para esta tesis esa vía complicaría la comparación más de lo que la aclararía.
+
+\section{Arquitectura de la solución propuesta}
+
+La solución propuesta adopta una arquitectura modular. Un primer componente se ocupa de la ingesta y normalización de archivos simbólicos. Un segundo define la representación discreta común sobre la que trabajarán todos los modelos. Un tercero implementa los modelos probabilísticos clásicos, en particular el HMM finito y el HDP-HMM truncado. Un cuarto aloja el modelo moderno basado en atención. Un quinto reúne evaluación, visualización y comparación de resultados.
+
+La ventaja de esta estructura es simple: separa preparación de datos, modelado y análisis, y hace posible que la comparación entre arquitecturas se realice sobre una base homogénea. Así, la diferencia entre modelos puede atribuirse con mayor claridad a sus supuestos y no a cambios accidentales en el pipeline experimental.
+
+\section{Justificación de la selección de modelos}
+
+La elección de modelos sigue una lógica escalonada. El HMM finito ofrece una línea base clara, interpretable y barata. El HDP-HMM truncado se incorpora como extensión natural de ese marco, pues responde al problema de fijar arbitrariamente el número de estados. El modelo basado en atención aparece, en cambio, como término de contraste: no para reemplazar de antemano a los anteriores, sino para examinar si una arquitectura más expresiva compensa su mayor costo y su menor transparencia.
+
+De este modo, la comparación no enfrenta simplemente ``lo clásico'' con ``lo moderno'', sino tres posiciones distintas ante el mismo problema: complejidad fija, complejidad flexible dentro del marco probabilístico y complejidad distribuida mediante atención.
+
+\section{Estrategia de evaluación comparativa}
+
+La evaluación debe realizarse sobre un mismo corpus preprocesado, con igual representación observable y con una división común entre entrenamiento, validación y prueba. De otro modo, la comparación perdería sentido. Tampoco conviene reducir el análisis a una sola métrica. Al menos deben considerarse cuatro dimensiones: ajuste estadístico, capacidad predictiva, costo computacional e interpretabilidad musical.
+
+El interés de esta estrategia es que permite formular una conclusión de diseño y no sólo un veredicto numérico. Si un modelo basado en atención mejora apenas el ajuste, pero a cambio exige más cómputo y ofrece menos inteligibilidad, entonces esa mejora puede resultar insuficiente para justificar su adopción en este contexto.
+
+\section{Discusión de compromisos de diseño}
+
+El primer compromiso es el que existe entre expresividad e interpretabilidad. El segundo, entre flexibilidad estructural y estabilidad computacional. El tercero, entre ambición metodológica y alcance realista. Estos compromisos no son accidentes del trabajo: son precisamente aquello que el diseño debe ordenar.
+
+El valor de la solución propuesta no dependerá sólo de qué modelo obtenga el mejor resultado, sino de si el sistema comparativo permite decidir con argumentos técnicos cuándo una arquitectura más compleja está justificada y cuándo no. Bajo esa luz, la parte computacional de la tesis no consiste en adoptar la técnica más reciente, sino en establecer un criterio razonable para elegir entre alternativas.

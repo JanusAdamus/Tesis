@@ -1,0 +1,10 @@
+\begin{tabular}{p{3.0cm}p{2.2cm}p{2.3cm}p{2.2cm}p{2.1cm}p{2.1cm}p{2.9cm}}
+\hline
+Modelo & Costo de implementacion & Costo de experimentacion & Costo computacional & Costo epistemico & Costo de mantenimiento & Observacion base \\
+\hline
+HMM finito & Bajo & Bajo & Bajo & Bajo & Bajo & Pipeline compacto: pocas decisiones de entrenamiento, facil de auditar y explicar \\
+HDP-HMM truncado & Moderado & Moderado & Moderado & Bajo a moderado & Moderado & Incrementa complejidad inferencial, pero todavia sin necesidad de perfiles y suites de ablacion separados \\
+Transformer baseline & Moderado a alto & Alto & Moderado a alto & Alto & Alto & Ya requiere tokenizer, ventanas, checkpoints, metricas top-k y reportes consolidados \\
+Transformer research & Muy alto & Muy alto & Alto & Alto & Muy alto & Anade representacion rica, sesgo relativo, ruta de atencion \texttt{auto/eager}, suite canonica por ablaciones y mayor disciplina documental \\
+\hline
+\end{tabular}
