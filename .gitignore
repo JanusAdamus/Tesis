@@ -1,5 +1,13 @@
-# Codex/workspace metadata
+# Agent tooling and metadata
 /.codex
+/.claude/
+/.cursor/
+/.aider*
+/.github/copilot-instructions.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.mcp.json
 
 # LaTeX build products
 *.aux
