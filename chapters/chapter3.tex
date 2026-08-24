@@ -130,12 +130,12 @@ La Figura~\ref{fig:ihmm-truncamiento} separa las dos ideas que suele confundir e
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    scale=0.88,
+    scale=0.85,
     transform shape,
     >=latex,
     state/.style={circle, draw, minimum size=0.72cm, fill=black!10},
     unused/.style={circle, draw, dashed, minimum size=0.72cm},
-    step/.style={circle, draw, minimum size=0.62cm},
+    trajectory/.style={circle, draw, minimum size=0.62cm},
     arrow/.style={->, thick}
 ]
 \draw[rounded corners, fill=black!2] (-6.4,-1.75) rectangle (-0.25,2.05);
@@ -149,10 +149,10 @@ La Figura~\ref{fig:ihmm-truncamiento} separa las dos ideas que suele confundir e
 \node at (-1.15,0.85) {$\cdots$};
 \node[font=\small] at (-3.325,0.15) {estados potenciales};
 
-\node[step] (it1) at (-5.25,-0.75) {$2$};
-\node[step] (it2) at (-4.0,-0.75) {$1$};
-\node[step] (it3) at (-2.75,-0.75) {$3$};
-\node[step] (it4) at (-1.5,-0.75) {$2$};
+\node[trajectory] (it1) at (-5.25,-0.75) {$2$};
+\node[trajectory] (it2) at (-4.0,-0.75) {$1$};
+\node[trajectory] (it3) at (-2.75,-0.75) {$3$};
+\node[trajectory] (it4) at (-1.5,-0.75) {$2$};
 \draw[arrow] (it1) -- (it2);
 \draw[arrow] (it2) -- (it3);
 \draw[arrow] (it3) -- (it4);
@@ -166,10 +166,10 @@ La Figura~\ref{fig:ihmm-truncamiento} separa las dos ideas que suele confundir e
 \node[unused] (kk) at (5.55,0.85) {$K$};
 \node[font=\small] at (3.325,0.15) {cota computacional};
 
-\node[step] (kt1) at (1.4,-0.75) {$2$};
-\node[step] (kt2) at (2.65,-0.75) {$1$};
-\node[step] (kt3) at (3.9,-0.75) {$3$};
-\node[step] (kt4) at (5.15,-0.75) {$2$};
+\node[trajectory] (kt1) at (1.4,-0.75) {$2$};
+\node[trajectory] (kt2) at (2.65,-0.75) {$1$};
+\node[trajectory] (kt3) at (3.9,-0.75) {$3$};
+\node[trajectory] (kt4) at (5.15,-0.75) {$2$};
 \draw[arrow] (kt1) -- (kt2);
 \draw[arrow] (kt2) -- (kt3);
 \draw[arrow] (kt3) -- (kt4);
@@ -225,7 +225,7 @@ En los experimentos se denomina \emph{estado efectivo} a cualquiera de los estad
 
 En esta tesis, las observaciones son clases de altura y el iHMM conserva un papel conceptual. El HDP-HMM truncado es la versión computacional que se ajusta con los datos de las obras y se compara con el HMM finito. La comparación comienza con una pieza extensa, cuya trayectoria puede examinarse antes de resumir los resultados del corpus.
 
-\section{De una obra al corpus}
+\section{Una obra de referencia}
 
 El caso ilustrativo es el tercer movimiento de la Sonata núm.~14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud permite observar con detalle las diferencias entre trayectorias y entender los resultados que después se resumen. Este análisis sólo tiene carácter ilustrativo, pues una obra no constituye evidencia general a favor de un modelo.
 
@@ -246,7 +246,7 @@ Los dos modelos difieren tanto en el ajuste como en la ocupación de estados. El
 
 El resultado todavía puede depender de las particularidades de la sonata. Para saber si se repite en un conjunto controlado, la comparación se extiende a seis piezas breves antes de incorporar un repertorio mayor.
 
-\subsection{Resultados sobre un subconjunto clásico}
+\section{Resultados en el subconjunto clásico}
 
 La comparación controlada utiliza las seis piezas breves de la Tabla~\ref{tab:corpus-clasico-limitado}. Las observaciones son clases de altura. Para el HDP-HMM se fija $K=12$, con $\alpha=8$, $\alpha_0=4$, $\gamma=2$, $\eta=1$ y $\kappa=0$. Se realizan veinte iteraciones de inferencia, se descartan las diez primeras como calentamiento y se utiliza la semilla $7$. Estos valores documentan la configuración de la corrida, pero no constituyen una búsqueda exhaustiva de hiperparámetros ni sustituyen los artefactos primarios faltantes.
 
@@ -322,7 +322,7 @@ Queda otra pregunta: ¿la mayor log-verosimilitud exige ocupar más estados? La 
 
 El resultado es descriptivo y se limita a seis piezas: ni la log-verosimilitud ni el número de estados establecen que las fronteras latentes correspondan a frases, acordes o secciones. Para saber si la diferencia de ajuste aparece fuera de este repertorio breve, la evaluación se amplía a dos fuentes musicales.
 
-\subsection{Resultados sobre el corpus extendido}
+\section{Resultados en el corpus extendido}
 
 El corpus extendido incorpora obras más largas y una tradición musical distinta. Reúne repertorio occidental identificado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}; la Tabla~\ref{tab:corpus-extendido} resume su composición. En el análisis se conserva la procedencia de cada obra. Incluir ambos repertorios en una misma evaluación no supone que compartan la misma teoría armónica.
 

@@ -1,0 +1,61 @@
+{
+  "schema_version": "2.0",
+  "review_id": "TESIS-SINODALES-20260824",
+  "material": {
+    "status": "unpublished_confidential",
+    "contains_personal_or_sensitive_data": false
+  },
+  "authorization": {
+    "basis": "author_request",
+    "documented": true,
+    "local_processing_authorized": true,
+    "external_processing_authorized": false
+  },
+  "reviewer": {
+    "capacity": "author_requested_reader",
+    "human_accountable": true,
+    "competence_areas": [
+      "statistics",
+      "computer_science",
+      "artificial_intelligence"
+    ],
+    "competence_limits": [
+      "No se realiza un dictamen musicologico especializado ni una decision institucional."
+    ],
+    "conflict_status": "none_identified",
+    "conflicts": []
+  },
+  "venue_policy": {
+    "checked": true,
+    "peer_review_model": "open",
+    "confidential_editor_notes_supported": false
+  },
+  "ai_use": {
+    "policy": "permitted_with_disclosure",
+    "planned": "approved_ai_assistance",
+    "permission_confirmed": true,
+    "disclosure_planned": true
+  },
+  "handling": {
+    "local_only": true,
+    "external_service_use": false,
+    "data_reuse_permitted": false,
+    "retention_rule": "delete_after_review",
+    "deletion_or_retention_record_planned": true
+  },
+  "scope": {
+    "manuscript_type": "computational_thesis",
+    "requested_focus": [
+      "statistics",
+      "experimental_design",
+      "machine_learning",
+      "reproducibility",
+      "claim_evidence_alignment"
+    ],
+    "out_of_scope": [
+      "editorial_decision",
+      "musicological_validation"
+    ],
+    "specialist_review_needed": []
+  }
+}

@@ -1,0 +1,11 @@
+\begin{tabular}{@{}p{2.4cm}p{8.2cm}@{}}
+\hline
+Medida & Lectura intuitiva y criterio \\
+\hline
+NLL por evento & Penalización media por asignar poca probabilidad a la nota observada. Una NLL menor indica mejor predicción. \\
+\emph{Perplexity} & Expresa la misma penalización como un número efectivo de alternativas. Un valor menor indica mejor predicción. \\
+Diferencia pareada de NLL & Resta la NLL de dos modelos sobre la misma obra, para que cada pieza aporte una comparación. Si $\Delta=\mathrm{NLL}_A-\mathrm{NLL}_B$, un signo negativo favorece a $A$. \\
+Intervalo y prueba pareada & El intervalo \emph{bootstrap} muestra la precisión de la diferencia; Wilcoxon y Holm comprueban su consistencia al examinar varios pares. Un intervalo que no incluye cero respalda la dirección, pero el valor $p$ ajustado no mide su magnitud. \\
+Tiempo y tamaño & Describen el costo observado de ajustar y evaluar cada implementación. Se leen aparte porque el hardware no fue el mismo. \\
+\hline
+\end{tabular}

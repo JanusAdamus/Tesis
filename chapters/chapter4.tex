@@ -66,7 +66,18 @@ Considérese un segmento de prueba $y_1,\ldots,y_T$. En cada posición $t$, el m
 \qquad
 \operatorname{perplexity}=\exp(\operatorname{NLL}).
 \]
-La penalización disminuye cuando el modelo concentra mayor probabilidad en los eventos observados. Valores menores de NLL y \emph{perplexity} indican, por tanto, mejor predicción. Las dos cantidades expresan la misma información en escalas distintas; la \emph{perplexity} facilita la lectura, pero no aporta una segunda fuente independiente de evidencia.
+La penalización disminuye cuando el modelo concentra mayor probabilidad en los eventos observados. Valores menores de NLL y \emph{perplexity} indican, por tanto, mejor predicción. De manera aproximada, una \emph{perplexity} igual a $q$ puede leerse como si el modelo dudara entre $q$ alternativas igualmente probables en cada paso. La distribución real no tiene que ser uniforme, pero esta imagen permite entender por qué un valor menor es preferible. NLL y \emph{perplexity} expresan la misma información en escalas distintas y no constituyen dos evidencias independientes.
+
+La Tabla~\ref{tab:chapter4-metricas-lectura} resume cómo se decide si la ventaja de un modelo es predictiva, consistente entre obras o solamente computacional. La comparación no depende de una sola cifra: la NLL mide la calidad predictiva, el análisis pareado comprueba si la diferencia se repite entre obras y los tiempos describen el costo observado.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\input{chapters/tables/chapter4_metricas_lectura}
+\caption{Lectura de las métricas utilizadas en la comparación. Las medidas de predicción determinan qué modelo asigna más probabilidad a las notas de prueba; las de costo se interpretan por separado.}
+\label{tab:chapter4-metricas-lectura}
+\end{table}
 
 Usar la misma fórmula no basta para garantizar una comparación equitativa: los modelos deben puntuar exactamente los mismos eventos. El símbolo de inicio se utiliza como contexto, pero no cuenta como una nota adicional que deba predecirse. El símbolo de relleno del transformador tampoco se incluye entre los eventos puntuados. Los conjuntos de validación y prueba se dividen en segmentos no superpuestos de hasta $128$ eventos, incluida la cola final aunque sea corta. Cada nota de prueba se puntúa una sola vez, con los mismos reinicios de contexto en las cuatro familias.
 
@@ -91,9 +102,7 @@ Las configuraciones se seleccionan únicamente con validación. Para el HMM fini
 
 El análisis final toma la obra como unidad de comparación. Primero se promedian las variantes y repeticiones de una misma obra. Después se calcula, para cada par de modelos, la diferencia de NLL sobre las mismas piezas. De este modo, cada obra aporta un punto y una pieza larga no se convierte, por su número de notas, en centenares de observaciones independientes. La incertidumbre se estima con un intervalo \emph{bootstrap} obtenido mediante $10\,000$ remuestreos de las obras. La prueba de rangos con signo de Wilcoxon utiliza el signo y el orden de las diferencias pareadas, y el ajuste de Holm toma en cuenta que se examinan seis pares a la vez \cite{wilcoxon1945,holm1979,efron1979,demsar2006}.
 
-\subsection{Comprobaciones previas}
-
-Una diferencia entre modelos sólo es interpretable si todos resuelven la misma tarea. En la corrida final, el símbolo de inicio del VOMM funciona como contexto y el relleno del transformador queda fuera del cálculo de la puntuación. Una auditoría compara, obra por obra, los eventos esperados con los evaluados. Cualquier omisión, duplicación o alteración del orden invalida la corrida; no se corrige modificando el denominador.
+Antes de interpretar una diferencia entre modelos debe verificarse que todos resuelvan la misma tarea. En la corrida final, el símbolo de inicio del VOMM funciona como contexto y el relleno del transformador queda fuera del cálculo de la puntuación. Una auditoría compara, obra por obra, los eventos esperados con los evaluados. Cualquier omisión, duplicación o alteración del orden invalida la corrida; no se corrige modificando el denominador.
 
 El programa conserva el modelo elegido por validación, puede reanudarse aun cuando la última línea de un \emph{checkpoint} esté incompleta y reutiliza la caché para muestras menores. Los cálculos reescalados y vectorizados de ambos HMM se contrastan mediante pruebas de regresión con las versiones que operan en dominio logarítmico. Estas comprobaciones verifican que la corrida cumpla las condiciones computacionales previstas; no constituyen un resultado musical.
 
@@ -118,11 +127,13 @@ La \emph{perplexity} media de prueba aparece en la Tabla~\ref{tab:chapter4-learn
 
 Las curvas se separan al añadir obras. El transformador reduce su \emph{perplexity} de $7.640$ a $5.823$, un cambio de $23.8\%$. El HMM finito pasa de $7.655$ a $7.356$ y el HDP-HMM de $8.223$ a $7.968$, con reducciones de $3.9\%$ y $3.1\%$, respectivamente. El VOMM queda en una posición intermedia y reduce su valor en $8.4\%$. Dentro del intervalo estudiado, el transformador sigue beneficiándose del aumento del corpus; las configuraciones evaluadas de los otros modelos muestran reducciones menores.
 
+Al resumir todos los eventos de la fracción completa, el orden predictivo es transformador, HMM finito, HDP-HMM y VOMM, con \emph{perplexity} $5.823$, $7.356$, $7.968$ y $8.022$, respectivamente. Este orden describe la predicción promedio. Más adelante, la comparación pareada por obra muestra por qué también importa comprobar cómo se distribuye la diferencia entre piezas.
+
 En las treinta selecciones del HMM finito se eligieron $48$ estados, el valor más alto disponible. La curva sólo muestra que el HMM con $K\leq48$ se aproxima a una meseta, no que toda la familia finita haya agotado su capacidad. Distinguir ambas explicaciones exige ampliar la rejilla y repetir la selección mediante validación.
 
 El HDP-HMM obtiene una \emph{perplexity} mayor que el HMM finito en las cinco fracciones. Utiliza entre $14$ y $17$ estados efectivos de los $24$ disponibles, de modo que la cota no parece ser una restricción inmediata. En este corpus y para esta tarea, la cardinalidad latente flexible no produjo una ventaja predictiva. El resultado no contradice el Capítulo~\ref{chap:ihmm}: allí se estudiaron la log-verosimilitud de ajuste y la complejidad latente sobre otros corpus; aquí se mide predicción fuera de muestra sobre PDMX.
 
-\subsection{Comparación obra por obra}
+\section{Comparación obra por obra}
 
 Los promedios sobre todos los eventos pueden quedar dominados por unas cuantas piezas largas. Para saber cómo se distribuye la diferencia, se compara la NLL obra por obra. De las $424$ piezas de prueba, $414$ tuvieron una NLL válida para cada par comparado. La Tabla~\ref{tab:chapter4-pairwise-results} presenta los seis contrastes; un signo negativo favorece al primer modelo nombrado.
 

@@ -18,19 +18,19 @@ La Figura~\ref{fig:chapter0-pipeline} resume las decisiones que enlazan la parti
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    scale=0.82,
+    scale=0.72,
     transform shape,
     x=1cm,
     y=1cm,
     >=latex,
-    step/.style={draw, rounded corners, align=center, minimum height=1.05cm, fill=black!4, font=\small},
+    processbox/.style={draw, rounded corners, align=center, minimum height=1.05cm, fill=black!4, font=\small},
     arrow/.style={->, thick}
 ]
-\node[step, minimum width=2.25cm] (scores) at (-5.7,0) {Partituras\\MusicXML y MXL};
-\node[step, minimum width=2.45cm] (sequence) at (-2.75,0) {Secuencias de\\clases de altura};
-\node[step, minimum width=2.35cm] (splits) at (0.25,0) {Particiones por\\obra canónica};
-\node[step, minimum width=2.85cm] (models) at (3.45,0) {HMM, HDP-HMM,\\VOMM y transformador};
-\node[step, minimum width=2.45cm] (evaluation) at (6.6,0) {Predicción, estados\\latentes y costo};
+\node[processbox, minimum width=2.25cm] (scores) at (-5.7,0) {Partituras\\MusicXML y MXL};
+\node[processbox, minimum width=2.45cm] (sequence) at (-2.75,0) {Secuencias de\\clases de altura};
+\node[processbox, minimum width=2.35cm] (splits) at (0.25,0) {Particiones por\\obra canónica};
+\node[processbox, minimum width=2.85cm] (models) at (3.45,0) {HMM, HDP-HMM,\\VOMM y transformador};
+\node[processbox, minimum width=2.45cm] (evaluation) at (6.6,0) {Predicción, estados\\latentes y costo};
 
 \draw[arrow] (scores) -- (sequence);
 \draw[arrow] (sequence) -- (splits);
