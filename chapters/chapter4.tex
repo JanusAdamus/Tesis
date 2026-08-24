@@ -9,6 +9,69 @@ Esa pregunta permite establecer una base común, aunque sólo cubre una parte de
 
 Se incorpora también un modelo de Markov de orden variable, o VOMM por sus siglas en inglés \cite{begleiter2004}. A diferencia del HMM de primer orden, el VOMM puede consultar varios eventos observados del pasado; a diferencia del transformador, lo hace mediante tablas explícitas de conteos. Sirve así como punto de comparación para estimar cuánta mejora predictiva puede obtenerse con memoria local antes de recurrir a una arquitectura neuronal.
 
+La diferencia puede verse en la Figura~\ref{fig:chapter4-vomm-transformer}. El VOMM mantiene conteos para contextos observados de distintas longitudes y da más peso a los contextos largos cuando cuentan con evidencia suficiente. Si un contexto largo aparece pocas veces, la estimación se apoya más en contextos breves. El transformador, en cambio, representa cada evento y combina mediante atención causal la información de las posiciones anteriores antes de producir la distribución de la siguiente nota.
+
+\begin{figure}[htbp]
+  \centering
+  \resizebox{0.98\textwidth}{!}{%
+  \begin{tikzpicture}[
+    x=1cm,
+    y=1cm,
+    font=\small,
+    token/.style={draw, rounded corners=2pt, minimum width=0.72cm, minimum height=0.62cm, align=center},
+    context/.style={draw, rounded corners=2pt, minimum width=1.75cm, minimum height=0.62cm, align=center},
+    process/.style={draw, rounded corners=3pt, minimum width=3.5cm, minimum height=0.82cm, align=center},
+    output/.style={draw, rounded corners=3pt, minimum width=3.7cm, minimum height=0.70cm, align=center},
+    flow/.style={->, thick},
+    support/.style={->, thick, dashed}
+  ]
+    \node[font=\bfseries] at (-3.8,3.05) {(a) VOMM: memoria explícita};
+    \node[font=\bfseries] at (3.2,3.05) {(b) Transformador: atención causal};
+    \draw[gray!55] (0,3.35) -- (0,-2.25);
+
+    % VOMM
+    \node[token] (v1) at (-5.35,2.15) {C};
+    \node[token] (v2) at (-4.35,2.15) {G};
+    \node[token] (v3) at (-3.35,2.15) {A};
+    \node[token] (v4) at (-2.35,2.15) {E};
+    \node at (-1.30,2.15) {$\longrightarrow\; ?$};
+    \node[align=center, text=gray!70!black] at (-3.85,1.48) {contextos que terminan en la posición actual};
+
+    \node[context] (c1) at (-5.10,0.72) {$[E]$};
+    \node[context] (c2) at (-3.45,0.72) {$[A,E]$};
+    \node[context] (c3) at (-1.55,0.72) {$[G,A,E]$};
+    \node[process] (counts) at (-3.45,-0.55) {conteos por contexto\\y combinación según su evidencia};
+    \node[output] (vout) at (-3.45,-1.75) {$P(y_{t+1}\mid G,A,E)$};
+
+    \draw[flow] (c1) -- (counts);
+    \draw[flow] (c2) -- (counts);
+    \draw[support] (c3) -- (counts);
+    \draw[flow] (counts) -- (vout);
+
+    % Transformer
+    \node[token] (t1) at (1.15,2.15) {C};
+    \node[token] (t2) at (2.15,2.15) {G};
+    \node[token] (t3) at (3.15,2.15) {A};
+    \node[token] (t4) at (4.15,2.15) {E};
+    \node at (5.20,2.15) {$\longrightarrow\; ?$};
+    \node[process] (attention) at (3.15,0.65) {atención causal\\sobre las posiciones anteriores};
+    \node[process] (representation) at (3.15,-0.55) {representación contextual};
+    \node[output] (tout) at (3.15,-1.75) {$P(y_{t+1}\mid C,G,A,E)$};
+
+    \draw[flow] (t1) -- (attention);
+    \draw[flow] (t2) -- (attention);
+    \draw[flow] (t3) -- (attention);
+    \draw[flow] (t4) -- (attention);
+    \draw[flow] (attention) -- (representation);
+    \draw[flow] (representation) -- (tout);
+  \end{tikzpicture}%
+  }
+  \caption{Dos maneras de utilizar el contexto observable. El VOMM conserva conteos para contextos de diferentes longitudes y combina su evidencia; cuando los contextos largos aparecen pocas veces, se apoya más en los cortos. El transformador combina representaciones de las posiciones anteriores mediante atención causal. Ambos producen una distribución para la nota siguiente, pero sus mecanismos internos no son equivalentes.}
+  \label{fig:chapter4-vomm-transformer}
+\end{figure}
+
+Los dos modelos amplían así la memoria observable, pero conservan la información de manera distinta: el VOMM utiliza tablas que pueden inspeccionarse por contexto, mientras que el transformador aprende representaciones distribuidas. El dibujo resume el flujo de información; no identifica los componentes internos de ninguno de los modelos con estados musicales.
+
 La Figura~\ref{fig:chapter4-evaluation-focus} muestra la relación entre las dos preguntas. Los cuatro modelos reciben la misma representación y predicen el siguiente evento. El HMM finito y el HDP-HMM producen, además, trayectorias latentes que podrían utilizarse en un análisis estructural. A partir de ellas puede proponerse una segmentación, pero no constituyen segmentaciones de referencia.
 
 \begin{figure}[H]
