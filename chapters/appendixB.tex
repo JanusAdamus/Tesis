@@ -1,4 +1,103 @@
-\chapter{Apéndice B}
+\chapter{Propiedades del proceso observable en un HMM}
+\label{app:hmm-observable}
 
-% TODO: Agrega aquí el contenido del apéndice.
+El Capítulo~\ref{chap:hmm} afirma que las observaciones de un HMM no forman, en general, una cadena de Markov, aunque el par compuesto por estado y observación sí lo hace. Las demostraciones se reúnen aquí para conservar el argumento formal sin interrumpir la introducción de los algoritmos.
 
+\section{Las observaciones pueden conservar memoria}
+
+\begin{proposition}
+El proceso observable $(Y_t)_{t\geq 1}$ de una cadena de Markov oculta no es, en general, una cadena de Markov de primer orden.
+\end{proposition}
+
+\begin{proof}
+Considérese $\mathcal{S}=\{1,2\}$, $\mathcal{V}=\{0,1\}$ y
+\[
+A=
+\begin{pmatrix}
+1&0\\
+0&1
+\end{pmatrix},
+\qquad
+P(X_1=1)=P(X_1=2)=\tfrac12.
+\]
+El estado inicial permanece fijo durante toda la trayectoria. Condicionado en $X_1=1$, las observaciones son Bernoulli independientes con parámetro $p$; condicionado en $X_1=2$, lo son con parámetro $q$, donde $p,q\in(0,1)$ y $p\neq q$.
+
+Por la ley de la probabilidad total,
+\[
+P(Y_3=1\mid Y_2=1,Y_1=1)
+=
+\frac{p^3+q^3}{p^2+q^2},
+\]
+mientras que
+\[
+P(Y_3=1\mid Y_2=1)
+=
+\frac{p^2+q^2}{p+q}.
+\]
+Ambas cantidades son distintas, pues
+\[
+(p^3+q^3)(p+q)-(p^2+q^2)^2
+=
+pq(p-q)^2>0.
+\]
+Por tanto, conocer $Y_1$ además de $Y_2$ cambia la distribución de $Y_3$ y el proceso observable no satisface la propiedad de Markov de primer orden.
+\end{proof}
+
+La razón del resultado es más sencilla que el cálculo. Cada observación aporta evidencia sobre cuál de los dos regímenes ocultos está activo. Dos observaciones contienen más información sobre ese régimen que una sola y, por ello, pueden cambiar la predicción del siguiente símbolo.
+
+\section{El proceso conjunto sí es markoviano}
+
+\begin{proposition}
+Sea $Z_t=(X_t,Y_t)$. Entonces $(Z_t)_{t\geq 1}$ es una cadena de Markov en $\mathcal{S}\times\mathcal{V}$.
+\end{proposition}
+
+\begin{proof}
+Sean $(i,v),(j,w)\in\mathcal{S}\times\mathcal{V}$. Por la propiedad de Markov de $(X_t)$ y la independencia condicional de las emisiones,
+\[
+\begin{aligned}
+&P(Z_{t+1}=(j,w)\mid Z_t=(i,v),Z_{t-1},\ldots,Z_1)\\
+&\quad=
+P(X_{t+1}=j\mid X_t=i)
+P(Y_{t+1}=w\mid X_{t+1}=j)\\
+&\quad=a_{ij}b_j(w).
+\end{aligned}
+\]
+La expresión depende del presente sólo a través de $Z_t$, por lo que el proceso conjunto satisface la propiedad de Markov.
+\end{proof}
+
+\section{Un caso límite}
+
+Si la observación revela por completo el estado oculto, la memoria adicional desaparece. La proposición siguiente formaliza ese caso.
+
+\begin{proposition}
+Supóngase que existe una función $f:\mathcal{V}\to\mathcal{S}$ tal que
+\[
+X_t=f(Y_t)
+\quad\text{casi seguramente para todo }t\geq 1.
+\]
+Entonces $(Y_t)_{t\geq 1}$ es una cadena de Markov de primer orden.
+\end{proposition}
+
+\begin{proof}
+Para cualquier historial $y_{1:t}$ con probabilidad positiva, conocer $Y_t=y_t$ determina $X_t=f(y_t)$. La distribución de la siguiente observación es entonces
+\[
+\begin{aligned}
+&P(Y_{t+1}=v\mid Y_t=y_t,\ldots,Y_1=y_1)\\
+&\quad=
+\sum_{j\in\mathcal{S}}
+P(Y_{t+1}=v\mid X_{t+1}=j)
+P(X_{t+1}=j\mid X_t=f(y_t))\\
+&\quad=
+\sum_{j\in\mathcal{S}}b_j(v)a_{f(y_t)j}.
+\end{aligned}
+\]
+El último término depende únicamente de $y_t$. Por tanto,
+\[
+P(Y_{t+1}=v\mid Y_t=y_t,\ldots,Y_1=y_1)
+=
+P(Y_{t+1}=v\mid Y_t=y_t),
+\]
+y el proceso observable es markoviano.
+\end{proof}
+
+La condición anterior es excepcional en la interpretación musical de la tesis. Una clase de altura aislada no suele identificar un único contexto armónico. Precisamente por eso el historial de observaciones puede aportar información sobre el estado latente incluso cuando la dinámica oculta es de primer orden \cite{cappe2005}.

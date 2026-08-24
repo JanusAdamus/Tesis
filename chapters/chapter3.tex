@@ -1,24 +1,23 @@
 \chapter{Cadenas de Markov ocultas infinitas} 
+\label{chap:ihmm}
 \label{sec:proyecto}
 
-En el capítulo anterior se introdujo el modelo de cadenas de Markov ocultas como una formulación probabilística para describir la coexistencia de un proceso latente y una secuencia observable. En el contexto musical, esta idea permitió interpretar las notas observadas como emisiones generadas por un mecanismo interno no directamente visible, el cual puede asociarse a una estructura armónica, a una región tonal o, más generalmente, a un contexto musical subyacente.
+El capítulo anterior introdujo una cadena de Markov oculta con $N$ estados. Las notas forman la secuencia observable y los estados representan contextos musicales que no aparecen escritos de manera directa en la partitura. Una vez fijado $N$, pueden estimarse transiciones, emisiones y trayectorias latentes. Falta, sin embargo, tomar una decisión previa: ¿cuántos contextos deben permitirse?
 
-Tal descripción resulta adecuada siempre que se acepte que la dinámica latente puede resumirse en un conjunto finito de estados. El problema de este capítulo aparece precisamente cuando esa hipótesis comienza a quedarse corta para describir un vocabulario armónico más flexible.
+La respuesta no es evidente incluso en un ejemplo sencillo. Si se permiten muy pocos estados, el modelo puede reunir bajo una misma etiqueta regiones musicales que se comportan de manera distinta. Si se permiten demasiados, una regularidad que debería repetirse puede quedar repartida entre varios estados casi redundantes. El número de estados no es entonces un detalle de implementación, pues determina el nivel de resolución con el que se describe la obra.
 
-Así, el cambio respecto del capítulo anterior no consiste en introducir un objeto musical distinto, sino en reformular una decisión de modelado que hasta ahora permanecía fija. En el HMM finito, una vez elegido el número de estados, los algoritmos de evaluación e inferencia pueden aplicarse de manera directa; pero en aplicaciones musicales esa elección rara vez es inocua. Un vocabulario demasiado pequeño fusiona contextos armónicos con funciones distintas, mientras que uno demasiado grande fragmenta regularidades que sería preferible mantener unificadas.
+La separación entre proceso latente y observación sigue siendo útil, aunque $N$ deje de tratarse como una cantidad conocida. El modelo puede disponer de muchos estados potenciales y ocupar sólo los que necesita la secuencia. Un vocabulario finito de acordes permite ver primero por qué ambas cantidades no tienen que coincidir.
 
-La pregunta guía del capítulo puede formularse así: si la idea latente-observable del HMM sigue siendo musicalmente útil, pero el número de estados deja de ser evidente, ¿cómo permitir que el propio modelo ajuste su complejidad al repertorio analizado? Para responderla, primero se fija una línea base finita y después se introduce la extensión no paramétrica que relaja esa decisión.
-
-En una formulación armónica concreta, el HMM clásico exige fijar primero un conjunto finito $S$ de acordes permitidos y, una vez enumerado, identificar el espacio de estados ocultos con
+Supóngase, como ejemplo conceptual, que cada estado oculto debe corresponder a un acorde. El HMM clásico exige fijar primero un conjunto finito $S$ de acordes permitidos y después identificar el espacio de estados ocultos con
 \[
 \mathcal{S}=\{1,2,\dots,N\},
 \qquad N=\lvert S\rvert.
 \]
-La elección de $S$ determina simultáneamente la dimensión de la distribución inicial $\boldsymbol{\pi}$, de la matriz de transición $\mathbf{A}$ y de la familia de distribuciones de emisión $\mathbf{B}$. Para mantener comparabilidad e interpretabilidad, se adopta un vocabulario armónico finito construido como pares de la forma
+La elección de $S$ determina la dimensión de la distribución inicial $\boldsymbol{\pi}$, de la matriz de transición $\mathbf{A}$ y de la familia de emisiones $\mathbf{B}$. Una manera de construir ese vocabulario consiste en usar pares de la forma
 \[
 (\text{fundamental},\text{plantilla armónica}).
 \]
-El primer componente recoge la clase de altura y el segundo la sonoridad admitida.
+El primer componente indica la fundamental y el segundo la cualidad armónica.
 
 Sea
 \[
@@ -39,7 +38,7 @@ el conjunto de clases de altura fundamentales. Sea además
 \end{array}
 \right\}
 \]
-la familia de plantillas armónicas admitidas. Con ello se obtiene un repertorio suficientemente rico para distinguir triadas, séptimas, suspensiones y extensiones frecuentes sin volver opaco el espacio latente.
+una familia de plantillas que distingue triadas, séptimas, suspensiones y extensiones.
 
 Se define entonces
 \[
@@ -49,24 +48,24 @@ En consecuencia,
 \[
 \lvert S\rvert = 12\times 21 = 252.
 \]
-Este tamaño sigue siendo manejable para un HMM finito con observaciones discretas y evita colapsar sonoridades distintas sobre una misma triada elemental. Sin embargo, la decisión sigue siendo exógena: si $N$ es demasiado pequeño, el modelo fusiona funciones distintas; si es demasiado grande, fragmenta regularidades y dispersa masa de probabilidad. El problema central, entonces, no es sólo enriquecer el vocabulario armónico, sino permitir que la complejidad efectiva del espacio latente dependa de los datos y no de una elección previa.
+El ejemplo produce $252$ acordes posibles antes de observar una sola nota. Los experimentos no utilizan esa lista como etiquetas verdaderas: los estados latentes permanecen sin nombre y las observaciones son clases de altura. El cálculo muestra que un vocabulario musical razonable puede crecer con rapidez sin indicar cuántos estados necesita una obra concreta. Conviene entonces separar el número de estados disponibles del número que el modelo ocupa.
 
-\section{Modelos bayesianos no paramétricos para secuencias musicales}
+\section{Del número fijo a una colección abierta de estados}
 
-La situación anterior conduce al marco de los modelos bayesianos no paramétricos. Aquí \emph{no paramétrico} no significa ausencia de parámetros, sino ausencia de una cota fijada de antemano para la complejidad estructural del modelo. La herramienta central es el proceso de Dirichlet, que permite definir distribuciones a priori sobre medidas de probabilidad discretas \cite{ferguson1973,sethuraman1994}. Una discusión más amplia de esta construcción y de su versión jerárquica se deja al Apéndice A; en el cuerpo principal basta retener que el objetivo es reemplazar la elección exógena de $N$ por un mecanismo probabilístico capaz de reutilizar estados ya activados y, al mismo tiempo, introducir nuevos cuando la secuencia lo exige.
+Los modelos bayesianos no paramétricos formalizan esa separación. El término \emph{no paramétrico} puede resultar engañoso: el modelo sí tiene parámetros, pero no fija el número de componentes utilizados antes de observar los datos. En este caso se parte de una colección numerable de estados potenciales y se distribuye entre ellos la probabilidad mediante un proceso de Dirichlet \cite{ferguson1973,sethuraman1994}. El Apéndice~\ref{app:dirichlet} desarrolla el paso desde una distribución de Dirichlet finita hasta esta construcción.
 
-La primera extensión natural del HMM clásico consiste entonces en reemplazar el espacio finito de estados ocultos por un conjunto numerable infinito, que para fijar ideas se identifica con
+El HMM del capítulo anterior se mantiene y cambia su espacio de estados. En lugar de usar $\{1,\ldots,N\}$, se considera
 \[
 \mathcal{S}=\mathbb{N}.
 \]
-La hipótesis markoviana no se modifica: el futuro del proceso oculto depende únicamente del estado oculto presente, y cada observación depende solamente del estado latente actual. Lo que cambia es la cardinalidad del conjunto sobre el cual se definen las transiciones.
+La propiedad de Markov no cambia. El siguiente estado depende del estado presente y la observación depende del estado latente actual. La diferencia es que ya no se reserva de antemano un número exacto de contextos.
 
 \begin{Definicion}
 Una \emph{cadena de Markov oculta infinita} está determinada por dos procesos estocásticos en tiempo discreto
 \[
-(X_n)_{n\geq 0}, \qquad (Y_n)_{n\geq 0},
+(X_t)_{t\geq 1}, \qquad (Y_t)_{t\geq 1},
 \]
-donde $(X_n)$ toma valores en $\mathbb{N}$ y $(Y_n)$ toma valores en un espacio de observaciones $\mathcal{V}$. Se fija una distribución inicial
+donde $(X_t)$ toma valores en $\mathbb{N}$ y $(Y_t)$ toma valores en un espacio de observaciones $\mathcal{V}$. Se fija una distribución inicial
 \[
 \boldsymbol{\pi}=(\pi_i)_{i\geq 1},
 \]
@@ -80,12 +79,12 @@ y una familia de distribuciones de emisión
 \]
 de modo que, para todo $i,j\geq 1$ y todo $v\in\mathcal{V}$,
 \[
-P(X_0=i\mid \boldsymbol{\pi})=\pi_i,
+P(X_1=i\mid \boldsymbol{\pi})=\pi_i,
 \]
 \[
-P(X_{n+1}=j\mid X_n=i,\mathbf{A})=a_{ij},
+P(X_t=j\mid X_{t-1}=i,\mathbf{A})=a_{ij}, \quad t\geq 2,
 \qquad
-P(Y_n=v\mid X_n=j,\mathbf{B})=b_j(v),
+P(Y_t=v\mid X_t=j,\mathbf{B})=b_j(v), \quad t\geq 1,
 \]
 con
 \[
@@ -97,11 +96,9 @@ con
 \]
 \end{Definicion}
 
-La definición anterior extiende literalmente la formulación del HMM al caso de un espacio de estados ocultos numerable. La estructura markoviana y la factorización de la ley conjunta se conservan; lo que cambia es la forma de controlar la complejidad del espacio latente.
+Al ampliar el espacio de estados surge una dificultad concreta. Cada renglón de $\mathbf{A}$ debe asignar probabilidad a la misma colección, de modo que el estado $j$ conserve su significado sin importar el estado de origen. El proceso de Dirichlet jerárquico impone esta referencia compartida mediante una distribución global. En las cadenas ocultas, la construcción resultante se denomina HMM basado en un proceso de Dirichlet jerárquico, o HDP-HMM, y es una realización de la cadena de Markov oculta infinita, abreviada iHMM \cite{beal2002,teh2006}.
 
-La dificultad principal consiste en coordinar coherentemente los renglones de una matriz de transición infinita. Para ello se introduce una medida global que actúa como soporte compartido de las distribuciones de transición. Esta construcción conduce al proceso de Dirichlet jerárquico y, en el contexto de cadenas de Markov ocultas, al \emph{HDP-HMM} (\emph{Hierarchical Dirichlet Process Hidden Markov Model}), que proporciona una realización concreta del \emph{Infinite Hidden Markov Model (iHMM)} \cite{beal2002,teh2006}.
-
-En esta formulación se introduce una medida discreta aleatoria global
+La distribución global puede imaginarse como una barra de longitud uno que se rompe sucesivamente. El primer fragmento recibe peso $\beta_1$; del resto se obtiene $\beta_2$, y así sucesivamente. En conjunto, los fragmentos forman una distribución de probabilidad sobre los estados potenciales. En lo que sigue, $DP(c,H)$ denota un proceso de Dirichlet con concentración $c$ y medida base $H$; la abreviatura $i.i.d.$ indica variables independientes con la misma distribución. Formalmente, se escribe
 \[
 \beta=\sum_{k=1}^{\infty}\beta_k\delta_k,
 \]
@@ -109,7 +106,7 @@ donde
 \[
 \beta_k=v_k\prod_{\ell=1}^{k-1}(1-v_{\ell}),
 \qquad
-v_k \overset{i.i.d.}{\sim}\mathrm{Beta}(1,\gamma),
+v_k \overset{\mathrm{i.i.d.}}{\sim}\mathrm{Beta}(1,\gamma),
 \qquad k\geq 1,
 \]
 y se supone que
@@ -118,21 +115,21 @@ y se supone que
 \qquad
 A_i\mid \beta \sim DP(\alpha,\beta), \qquad i\geq 1,
 \]
-donde $A_i$ denota el renglón $i$-ésimo de $\mathbf{A}$.
+donde $A_i$ es el renglón $i$-ésimo de $\mathbf{A}$.
 \[
 \mathbb{E}[a_{ij}\mid\beta]=\beta_j.
 \]
-La medida global $\beta$ asigna pesos a una familia numerable de estados potenciales y acopla todas las distribuciones de transición al imponerles un soporte común. En términos musicales, esto permite reutilizar contextos latentes ya presentes sin impedir que aparezcan otros cuando la evidencia secuencial lo justifica.
+La distribución global $\beta$ funciona como un catálogo compartido. Cada renglón $A_i$ puede favorecer transiciones distintas, pero todos se refieren a los mismos estados y parten de los pesos $\beta_j$. En términos musicales, un contexto ya utilizado puede reaparecer en distintas regiones de la obra; un contexto nuevo conserva una probabilidad pequeña, pero positiva, de incorporarse.
 
-Cuando el espacio observable $\mathcal{V}$ es finito, como ocurre al modelar notas, clases de altura, intervalos o símbolos rítmicos discretizados, la familia de emisiones $\mathbf{B}$ puede mantenerse dentro de una parametrización finita ordinaria. En muchas aplicaciones musicales esta decisión es suficiente, porque la principal fuente de incertidumbre no suele residir en el alfabeto observable, sino en cuántos contextos latentes hacen falta para organizarlo en el tiempo.
+El alfabeto observable no necesita crecer junto con los estados. Si $\mathcal{V}$ contiene doce clases de altura, cada contexto latente puede conservar una distribución categórica sobre esas mismas doce posibilidades. Lo desconocido es cuántos contextos hacen falta para organizar la secuencia, no cuántos símbolos pueden observarse.
 
-La infinitud del espacio de estados no implica que una pieza finita requiera infinitos contextos latentes, sino que el modelo deja abierta esa complejidad y la delega a la inferencia. Ésta es la diferencia decisiva frente al HMM clásico: en lugar de fijar primero el número de estados y luego estimar transiciones y emisiones, el iHMM permite que la estructura latente emerja del comportamiento observado. Para el análisis musical, esto significa que distinciones armónicas, melódicas o formales sólo se separan cuando los datos ofrecen evidencia suficiente para hacerlo.
+El calificativo ``infinito'' describe la colección disponible, no el número de estados que aparecerán en una obra finita. Una trayectoria de longitud $T$ puede visitar, como máximo, $T$ estados y normalmente utiliza muchos menos. El modelo evita decidir esa cantidad antes del ajuste, aunque los estados obtenidos siguen siendo categorías estadísticas sin una etiqueta musical garantizada. Para interpretarlos deben examinarse sus emisiones, sus transiciones y su correspondencia con una referencia externa.
 
 
 
-\section{Aproximación truncada y formulación computacional}
+\section{Del modelo infinito a un cálculo finito}
 
-La formulación infinita descrita en la sección anterior tiene valor conceptual, pero su uso directo en inferencia complica la implementación porque la programación dinámica debe operar sobre un conjunto no acotado de estados potenciales. Por ello, en la práctica se emplea una aproximación truncada que conserva la estructura jerárquica del HDP-HMM y la proyecta sobre un simplex finito de dimensión $K$ \cite{ishwaran2001,fox2011,vangael2008}.
+Una computadora no puede almacenar una matriz con infinitos renglones y columnas. La implementación introduce entonces un techo $K$ y aproxima la colección numerable mediante los estados $1,\ldots,K$ \cite{ishwaran2001,fox2011,vangael2008}. El objetivo no es afirmar que la obra tiene exactamente $K$ contextos, sino elegir un techo suficientemente alto y permitir que la inferencia deje estados sin usar.
 
 \begin{Definicion}
 Fijado un entero $K\geq 2$, un \emph{HDP-HMM truncado} con espacio observable discreto $\mathcal{V}=\{1,\dots,V\}$ queda determinado por las variables aleatorias
@@ -155,7 +152,7 @@ A_i\mid \beta \sim \mathrm{Dir}(\alpha\beta+\kappa e_i), \qquad i=1,\dots,K,
 \[
 \phi_i\sim \mathrm{Dir}\left(\frac{\eta}{V},\dots,\frac{\eta}{V}\right), \qquad i=1,\dots,K,
 \]
-donde $e_i$ denota el $i$-ésimo vector canónico de $\mathbb{R}^K$. La cadena latente y las observaciones satisfacen entonces
+donde $e_i$ denota el $i$-ésimo vector canónico de $\mathbb{R}^K$. Si $\mathrm{Cat}(p)$ denota la distribución categórica con vector de probabilidades $p$, la cadena latente y las observaciones satisfacen
 \[
 X_1\mid \boldsymbol{\pi}\sim \mathrm{Cat}(\boldsymbol{\pi}),
 \qquad
@@ -166,15 +163,21 @@ Y_t\mid X_t=i,\phi_i\sim \mathrm{Cat}(\phi_i), \qquad t\geq 1.
 \]
 \end{Definicion}
 
-La escritura anterior conserva la lógica del modelo infinito: $\beta$ organiza el soporte compartido, $\alpha_0$ regula la distribución inicial y $\alpha$ controla cuánto puede apartarse cada renglón de la estructura global. En la práctica, lo importante es escoger un $K$ suficientemente amplio para que funcione como cota técnica y no como restricción activa. Una vez fijado, las transiciones y emisiones pueden manejarse como matrices finitas y la trayectoria latente puede inferirse con programación dinámica estándar, con costo dominante del orden de $O(TK^2)$.
+La notación separa el techo computacional de los estados que la trayectoria ocupa. Dentro de ese techo, $\beta$ reparte el peso global entre los $K$ estados; $\gamma$ influye en cómo se distribuye ese peso; $\alpha_0$ regula la distribución inicial y $\alpha$ permite que cada renglón de transición se aparte del patrón global. El parámetro $\kappa$ puede favorecer la permanencia en el mismo estado, mientras que $\eta$ controla la concentración de las emisiones sobre el alfabeto observable.
 
-En esta tesis, el modelo truncado se especializa al caso de observaciones categóricas de clase de altura. El iHMM conserva así su papel como referencia conceptual, mientras que el HDP-HMM truncado se vuelve la realización operativa con la que se efectúan los experimentos reproducibles y la comparación con el HMM finito.
+Una vez fijado $K$, las transiciones y emisiones vuelven a representarse mediante matrices finitas. Para una secuencia de longitud $T$, el costo dominante es del orden de $O(TK^2)$, pues en cada posición deben considerarse transiciones entre pares de estados. Así, un techo innecesariamente grande no es gratuito. Un techo demasiado pequeño, en cambio, puede convertirse en una restricción activa.
+
+En los experimentos se denomina \emph{estado efectivo} a un estado que aparece ocupado en la trayectoria inferida. Esta cuenta permite comprobar si el modelo utiliza una parte pequeña del techo disponible, pero no mide por sí misma calidad musical. Dos estados efectivos pueden separar contextos útiles o dividir arbitrariamente una misma región; esa diferencia sólo puede establecerse mediante interpretación o anotaciones externas.
+
+En esta tesis, las observaciones son clases de altura y el iHMM conserva un papel conceptual. El HDP-HMM truncado es la realización computacional que se ajusta sobre las obras y se compara con el HMM finito. La comparación comienza con una pieza extensa, donde la trayectoria puede examinarse antes de resumir resultados sobre un corpus.
 
 \section{De una obra al corpus}
 
-Antes de pasar a resúmenes agregados conviene fijar un caso singular que obligue al modelo a mostrar su conducta en condiciones exigentes. En lugar de empezar por promedios, se toma como obra ancla el tercer movimiento de la Sonata no.\ 14 de Beethoven, una pieza extensa dentro del corpus extendido, con $4133$ notas y $201$ compases. La elección no pretende canonizar una sola obra, sino introducir una situación en la que el HMM finito tiende a fragmentar en exceso el espacio latente y donde, por tanto, la promesa del modelo no paramétrico puede evaluarse de forma visible.
+El caso ilustrativo es el tercer movimiento de la Sonata no.\ 14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud permite observar con detalle las diferencias entre trayectorias y entender las salidas que luego se resumen. La lectura sólo es ilustrativa, pues una obra no constituye evidencia general a favor de un modelo.
 
-La Tabla~\ref{tab:single-anchor} resume el contraste cuantitativo. El HMM finito activa $88$ estados, mientras que el HDP-HMM truncado concentra la trayectoria en $9$ estados efectivos y mejora la log-verosimilitud en $2408.011$ unidades. En esta escala, la diferencia relevante no es sólo estadística: también cambia el tipo de organización que el modelo atribuye a la pieza.
+Las tablas y figuras de este capítulo son exportaciones versionadas de corridas anteriores del repositorio experimental. La copia actual conserva el código que las generó, pero no los CSV primarios de esas corridas. Por ello, las cifras pueden auditarse contra las exportaciones incluidas en la tesis, aunque una reproducción completa requiere recuperar los artefactos estructurados. El Capítulo~\ref{chap:comparacion-final} dispone de un reporte fijado por commit y documenta por separado la misma limitación para sus CSV y JSON.
+
+La Tabla~\ref{tab:single-anchor} compara log-verosimilitud, estados ocupados y segmentos contiguos de la trayectoria. Un segmento es una sucesión de posiciones consecutivas a las que el modelo asigna el mismo estado; un cambio de estado inicia el siguiente. Para una misma secuencia, una log-verosimilitud mayor, es decir, menos negativa, indica que el modelo asigna más probabilidad a las observaciones. La magnitud depende de la longitud de la pieza, de modo que estos valores no deben compararse directamente entre obras de tamaños distintos.
 
 \begin{table}[H]
 \centering
@@ -185,31 +188,24 @@ La Tabla~\ref{tab:single-anchor} resume el contraste cuantitativo. El HMM finito
 \label{tab:single-anchor}
 \end{table}
 
-La Figura~\ref{fig:single-anchor-graph} permite leer esa diferencia de manera más directa. El panel izquierdo no representa toda la maraña del HMM finito, sino sus estados más ocupados; aun con esa poda, la estructura aparece dispersa y obliga a dejar fuera decenas de estados residuales. El panel derecho muestra el resultado contrario: el HDP-HMM truncado reutiliza un conjunto pequeño de contextos y conserva conexiones claras entre ellos. La reducción de complejidad no debe entenderse como empobrecimiento, sino como una compresión de redundancias que vuelve más legible la organización latente de una obra larga y densa.
+La diferencia tiene dos componentes. El HMM finito ocupa $88$ estados y obtiene log-verosimilitud $-10242.186$; el HDP-HMM ocupa $9$ y obtiene $-7834.175$, una ganancia de $2408.011$ unidades. Sin embargo, el modelo truncado produce $1075$ segmentos, frente a $560$ del HMM, y su longitud media es menor. En esta obra, reducir el vocabulario de estados no equivale a producir menos cambios: el HDP-HMM reutiliza un conjunto pequeño de etiquetas con mayor frecuencia.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=\textwidth]{figures/chapter3/single_anchor_transition_comparison.png}
-\caption{Obra ancla del capítulo. El HMM finito sobrefragmenta la trayectoria en una nube de estados activos, mientras que el HDP-HMM truncado reorganiza la misma secuencia en un conjunto mucho más compacto de contextos reutilizados.}
-\label{fig:single-anchor-graph}
-\end{figure}
-
-Introducido el caso singular, el argumento necesita un control intermedio antes de generalizar al multicorpus. Por ello se conserva el caso base del capítulo como una escala reproducible de comparación: primero una obra difícil, después un subconjunto clásico pequeño y, sólo al final, el corpus heterogéneo de mayor tamaño.
+El resultado todavía puede depender de las particularidades de la sonata. Para saber si se repite en un conjunto controlado, la comparación se extiende a seis piezas breves antes de incorporar un repertorio mayor.
 
 \subsection{Resultados sobre un subconjunto clásico}
 
-La evaluación comparativa se realizó sobre un subconjunto clásico limitado para mantener control experimental. La observación utilizada fue la clase de altura y el modelo truncado se ajustó con $K=12$, $\alpha=8$, $\alpha_0=4$, $\gamma=2$, $\eta=1$, $\kappa=0$, veinte iteraciones totales, diez de \emph{burn-in} y semilla igual a $7$. La Tabla~\ref{tab:corpus-clasico-limitado} resume las seis piezas breves utilizadas como base reproducible de comparación.
+La comparación controlada utiliza las seis piezas breves de la Tabla~\ref{tab:corpus-clasico-limitado}. Las observaciones son clases de altura. Para el HDP-HMM se fija $K=12$, con $\alpha=8$, $\alpha_0=4$, $\gamma=2$, $\eta=1$ y $\kappa=0$. La inferencia realiza veinte iteraciones, descarta las diez primeras como calentamiento y utiliza semilla $7$. Estos valores documentan la configuración de la corrida, pero no constituyen una búsqueda exhaustiva de hiperparámetros ni sustituyen los artefactos primarios faltantes.
 
 \begin{table}[H]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4pt}
 \input{chapters/tables/chapter3_corpus_clasico}
-\caption{Subconjunto clásico limitado utilizado para la comparación reproducible entre el HMM finito y el HDP-HMM truncado.}
+\caption{Subconjunto clásico limitado utilizado para la comparación documentada entre el HMM finito y el HDP-HMM truncado.}
 \label{tab:corpus-clasico-limitado}
 \end{table}
 
-La Tabla~\ref{tab:resumen-resultados-clasicos} condensa el resultado central: en las seis obras, el modelo truncado obtiene una log-verosimilitud superior a la del HMM finito. La ganancia media es de $92.970$ unidades, la mediana de $98.739$ y el número medio de estados efectivos del HDP-HMM truncado es menor que el número medio de estados activos del baseline finito.
+Los resultados agregados aparecen en la Tabla~\ref{tab:resumen-resultados-clasicos}. En las seis obras, el modelo truncado obtiene una log-verosimilitud mayor que el HMM finito. La ganancia media es de $92.970$ unidades y la mediana de $98.739$. El HDP-HMM ocupa además un promedio de $6.667$ estados, frente a $10.833$ del HMM finito.
 
 \begin{table}[H]
 \centering
@@ -219,7 +215,7 @@ La Tabla~\ref{tab:resumen-resultados-clasicos} condensa el resultado central: en
 \label{tab:resumen-resultados-clasicos}
 \end{table}
 
-La evidencia por obra aparece en la Tabla~\ref{tab:resultados-por-obra}. Dado que este experimento intermedio fue diseñado como control reproducible y no como corpus amplio, la tabla contiene sólo seis piezas. La magnitud de la mejora varía, pero el patrón es uniforme: ninguna favorece al modelo finito. Incluso en este repertorio sencillo, permitir que el número efectivo de estados se ajuste a la obra produce una ventaja estadística tangible.
+El promedio oculta que la magnitud de la ganancia cambia entre piezas. La Tabla~\ref{tab:resultados-por-obra} conserva ese detalle y muestra una diferencia positiva en las seis obras. El conjunto es pequeño y la medida corresponde al ajuste sobre las secuencias analizadas; se trata, por tanto, de un resultado descriptivo de la corrida y no de una prueba general de superioridad predictiva.
 
 \begin{table}[H]
 \centering
@@ -230,7 +226,7 @@ La evidencia por obra aparece en la Tabla~\ref{tab:resultados-por-obra}. Dado qu
 \label{tab:resultados-por-obra}
 \end{table}
 
-La Figura~\ref{fig:logverosimilitud-clasica} confirma visualmente el mismo patrón: todas las obras quedan del lado favorable al HDP-HMM truncado y la distribución agregada de log-verosimilitud también se desplaza en su favor.
+La Figura~\ref{fig:logverosimilitud-clasica} ofrece dos lecturas de esas mismas seis obras. En el primer panel, todos los puntos quedan del lado de mayor log-verosimilitud para el HDP-HMM; el segundo muestra la separación agregada entre ambos modelos.
 
 \begin{figure}[H]
 \centering
@@ -246,11 +242,11 @@ La Figura~\ref{fig:logverosimilitud-clasica} confirma visualmente el mismo patr�
 \includegraphics[width=\linewidth]{figures/chapter3/classic_log_likelihood_boxplot.png}
 \caption{Distribución agregada de log-verosimilitud por modelo.}
 \end{subfigure}
-\caption{Lectura visual del ajuste probabilístico en el subconjunto clásico limitado. En ambos paneles, el desplazamiento favorece al HDP-HMM truncado.}
+\caption{Ajuste probabilístico en el subconjunto clásico. Los paneles presentan los mismos seis casos por obra y de manera agregada.}
 \label{fig:logverosimilitud-clasica}
 \end{figure}
 
-La Figura~\ref{fig:ganancia-y-complejidad-clasica} añade el segundo punto importante: la mejora no proviene de inflar indiscriminadamente la complejidad. El HDP-HMM truncado obtiene mejor ajuste y, al mismo tiempo, usa menos estados efectivos que el HMM finito.
+La Figura~\ref{fig:ganancia-y-complejidad-clasica} permite leer juntos el ajuste y el número de estados ocupados. En estas corridas, la mayor log-verosimilitud del HDP-HMM aparece junto con una ocupación menor del espacio latente. Esa cuenta describe compacidad estadística, pero no permite juzgar la calidad musical de la trayectoria.
 
 \begin{figure}[H]
 \centering
@@ -266,15 +262,15 @@ La Figura~\ref{fig:ganancia-y-complejidad-clasica} añade el segundo punto impor
 \includegraphics[width=\linewidth]{figures/chapter3/classic_state_counts_by_piece.png}
 \caption{Comparación del número de estados por obra.}
 \end{subfigure}
-\caption{Descomposición visual de la ventaja del HDP-HMM truncado. El panel izquierdo mide la ganancia en ajuste y el derecho compara la complejidad latente efectiva de ambos modelos.}
+\caption{Ganancia de log-verosimilitud y ocupación latente en el subconjunto clásico. El panel superior muestra la diferencia de ajuste y el inferior el número de estados ocupados.}
 \label{fig:ganancia-y-complejidad-clasica}
 \end{figure}
 
-Estos resultados deben leerse con cautela: el subconjunto es pequeño y la log-verosimilitud no agota la calidad musicológica de una segmentación latente. Su función dentro del capítulo es más específica: servir de puente entre la obra ancla y el multicorpus. Aun así, la evidencia basta para sostener la conclusión metodológica de esta sección: cuando no se fija \emph{ex ante} el número efectivo de estados, la aproximación truncada al iHMM mejora el ajuste y mantiene una complejidad posterior contenida.
+La misma diferencia aparece en las seis piezas, aunque el conjunto sigue siendo pequeño. Además, la log-verosimilitud y el número de estados responden preguntas estadísticas; ninguna de las dos medidas establece que las fronteras latentes correspondan a frases, acordes o secciones. La evaluación se amplía a dos fuentes musicales para comprobar si la diferencia de ajuste también aparece fuera de este repertorio breve.
 
 \subsection{Resultados sobre el corpus extendido}
 
-Una vez establecida la ventaja del modelo truncado en una obra exigente y en un subconjunto clásico controlado, conviene preguntar si esa ventaja se mantiene al ampliar el repertorio. Para ello se construyó un corpus extendido con dos fuentes: repertorio occidental etiquetado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}. La Tabla~\ref{tab:corpus-extendido} resume su composición. El interés de esta ampliación no es homogeneizar ambos repertorios, sino probar la estabilidad del modelo cuando cambia de manera significativa el entorno estilístico.
+El corpus extendido incorpora obras más largas y otro entorno musical. Reúne repertorio occidental identificado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}; la Tabla~\ref{tab:corpus-extendido} resume su composición. Ambos repertorios conservan su procedencia. Su reunión para esta evaluación no supone que compartan la misma teoría armónica.
 
 \begin{table}[H]
 \centering
@@ -285,7 +281,7 @@ Una vez establecida la ventaja del modelo truncado en una obra exigente y en un 
 \label{tab:corpus-extendido}
 \end{table}
 
-De las $169$ obras catalogadas, $168$ pudieron correrse en la evaluación multicorpus y $167$ quedaron comparables entre ambos modelos; en la corrida base una obra de Mozart no entró al lote final y una pieza de Brahms arrojó un error de ejecución. Aun con esa salvedad, la evidencia es nítida. La Tabla~\ref{tab:resultados-multicorpus} muestra que el HDP-HMM truncado mejora la log-verosimilitud en las $167$ obras comparables. La ganancia media global asciende a $452.751$ unidades y la mediana a $377.039$, mientras que el número medio de estados efectivos del HDP-HMM truncado se mantiene cerca de $8$ frente a más de $32$ estados activos del HMM finito.
+De las $169$ obras catalogadas, $168$ pudieron procesarse y $167$ quedaron comparables entre ambos modelos. Una obra de Mozart no entró al lote final y una pieza de Brahms produjo un error de ejecución. Estos casos quedan fuera del denominador de la Tabla~\ref{tab:resultados-multicorpus}, que resume las $167$ comparaciones válidas. En todas ellas, el HDP-HMM obtiene una log-verosimilitud mayor. La ganancia media es de $452.751$ unidades y la mediana de $377.039$; el HDP-HMM ocupa en promedio $8.222$ estados, frente a $32.162$ del HMM finito.
 
 \begin{table}[H]
 \centering
@@ -296,18 +292,18 @@ De las $169$ obras catalogadas, $168$ pudieron correrse en la evaluación multic
 \label{tab:resultados-multicorpus}
 \end{table}
 
-Como el multicorpus reúne $167$ comparaciones válidas, una tabla exhaustiva por obra rompería el flujo del capítulo. Por ello, la Tabla~\ref{tab:resultados-multicorpus-muestra} presenta una muestra representativa balanceada entre ambas fuentes y distribuida a lo largo de distintos tamaños de pieza. Aun en esa lectura parcial, la ventaja del HDP-HMM truncado se mantiene.
+Para no interrumpir la lectura con una tabla de $167$ obras, la Tabla~\ref{tab:resultados-multicorpus-muestra} presenta ocho ejemplos: cuatro de cada fuente y con longitudes distintas. La selección es ilustrativa. Los promedios y denominadores de la Tabla~\ref{tab:resultados-multicorpus} proceden del conjunto completo de casos válidos.
 
 \begin{table}[H]
 \centering
 \footnotesize
 \setlength{\tabcolsep}{4pt}
 \input{chapters/tables/chapter3_resultados_multicorpus_muestra}
-\caption{Muestra representativa de resultados por obra en el corpus extendido. Se incluyen ejemplos de \texttt{MuseTrainer} y \texttt{SymbTr} para mostrar la estabilidad del patrón fuera del subconjunto clásico.}
+\caption{Ejemplos de resultados por obra en el corpus extendido. Se incluyen cuatro piezas de \texttt{MuseTrainer} y cuatro de \texttt{SymbTr} con distintas longitudes.}
 \label{tab:resultados-multicorpus-muestra}
 \end{table}
 
-La Figura~\ref{fig:logverosimilitud-multicorpus} muestra visualmente la estabilidad de este resultado: las obras quedan del lado favorable al HDP-HMM truncado y la distribución agregada de log-verosimilitud también se desplaza de forma consistente.
+Las $167$ comparaciones aparecen en la Figura~\ref{fig:logverosimilitud-multicorpus}. El primer diagrama permite comprobar el signo de cada diferencia por obra; el segundo resume la distribución de log-verosimilitud dentro de cada modelo.
 
 \begin{figure}[H]
 \centering
@@ -323,11 +319,11 @@ La Figura~\ref{fig:logverosimilitud-multicorpus} muestra visualmente la estabili
 \includegraphics[width=\linewidth]{figures/chapter3/multicorpus_log_likelihood_boxplot.png}
 \caption{Distribución agregada de log-verosimilitud por modelo.}
 \end{subfigure}
-\caption{Lectura visual del ajuste probabilístico sobre el corpus extendido. En ambos paneles, el desplazamiento favorece al HDP-HMM truncado.}
+\caption{Log-verosimilitud por obra y distribución agregada en el corpus extendido. Las comparaciones se limitan a los $167$ casos válidos para ambos modelos.}
 \label{fig:logverosimilitud-multicorpus}
 \end{figure}
 
-La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} refuerza la misma lectura: la ganancia de log-verosimilitud es uniformemente positiva y el modelo truncado mantiene una ocupación efectiva de estados mucho más contenida que la del HMM finito.
+La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} separa los dos componentes del resultado. El panel superior muestra que la diferencia de log-verosimilitud es positiva en los casos comparables; el inferior, que el HDP-HMM utiliza menos estados efectivos en promedio. Como en el subconjunto clásico, ambas observaciones describen ajuste y ocupación, no calidad de segmentación.
 
 \begin{figure}[H]
 \centering
@@ -343,8 +339,10 @@ La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} refuerza la misma lectura
 \includegraphics[width=\linewidth]{figures/chapter3/multicorpus_state_counts_scatter.png}
 \caption{Comparación del número de estados utilizados por ambos modelos.}
 \end{subfigure}
-\caption{Ganancia y complejidad latente en el corpus extendido. El HDP-HMM truncado mejora el ajuste y, al mismo tiempo, mantiene una ocupación efectiva de estados mucho más contenida.}
+\caption{Ganancia de log-verosimilitud y ocupación latente en el corpus extendido. El número de estados ocupados no constituye una métrica estructural de referencia.}
 \label{fig:ganancia-y-complejidad-multicorpus}
 \end{figure}
 
-La lectura crítica de esta evidencia exige distinguir entre mejora estadística y superioridad musicológica en sentido fuerte. En \texttt{SymbTr}, por ejemplo, la mejora no prueba que el vocabulario finito de referencia capture adecuadamente la teoría musical nativa del corpus; sí muestra, en cambio, que la aproximación truncada al modelo infinito es más robusta cuando el repertorio se vuelve heterogéneo. En conjunto, el corpus extendido fortalece la conclusión central del capítulo: truncar el iHMM no sólo vuelve viable la inferencia, sino que ofrece una realización empíricamente estable del principio no paramétrico, con mejor ajuste y complejidad efectiva menor.
+En las corridas de este capítulo, el HDP-HMM combina mayor log-verosimilitud con un vocabulario latente ocupado más pequeño. El patrón aparece en el subconjunto clásico y en las $167$ obras comparables del corpus extendido. En \texttt{SymbTr}, sin embargo, no demuestra que los estados recuperen categorías propias de la teoría makam; describe únicamente el ajuste a las clases de altura utilizadas.
+
+Estos resultados describen únicamente las secuencias analizadas: el HDP-HMM truncado ofrece en ellas una representación latente más compacta y un mejor ajuste, pero no ha sido evaluado contra anotaciones estructurales ni sobre una tarea predictiva común fuera de muestra. El capítulo siguiente mantiene la estructura como objetivo musical y compara HMM finito, HDP-HMM, VOMM y transformador en la predicción del siguiente evento. Un mejor ajuste en este capítulo no implica, por sí solo, que el mismo modelo sea el mejor predictor en la comparación final.

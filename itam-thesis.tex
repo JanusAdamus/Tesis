@@ -13,7 +13,7 @@
 \usepackage{placeins}   % para \FloatBarrier
 \theoremstyle{plain}
 \newtheorem{proposition}{Proposición}[chapter]
-\newtheorem{Definicion}{Definicion}
+\newtheorem{Definicion}{Definición}[chapter]
 \newtheorem{observacion}{Observación}[chapter]
 \theoremstyle{remark}
 \newtheorem{remark}{Observación}[chapter]
@@ -29,8 +29,6 @@
 \setlength{\parskip}{0.5em}
 \emergencystretch=2em
 
-\input{frontmatter/personalize}
-
 \frontmatter
 
     \setcounter{chapter}{0}
@@ -39,18 +37,7 @@
     \include{chapters/chapter2}
     \include{chapters/chapter3}
     \include{chapters/chapter4}
-   \phantomsection
-   \addcontentsline{toc}{chapter}{Apéndice A}
-   \hypertarget{apendiceA}{}
-
-   \phantomsection
-   \addcontentsline{toc}{chapter}{Apéndice B}
-   \hypertarget{apendiceB}{}
-
     \backmatter
-
-    \printindex[analytic]
-    \addcontentsline{toc}{chapter}{Índice Analítico}
 
 \newpage
  \thispagestyle{empty}

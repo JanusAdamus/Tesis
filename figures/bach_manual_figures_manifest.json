@@ -1,0 +1,31 @@
+{
+  "description": "Figuras limpias del ejercicio manual sobre Bach.",
+  "source_images": {
+    "inferred": {
+      "path": "figures\\Inferida.png",
+      "sha256": "395b198b4b4bb62f24fba5bb8b76d28b9836c4632145016b7f99e7dfc05b0256"
+    },
+    "reference": {
+      "path": "figures\\real.png",
+      "sha256": "dd088ddcf3b42dc0f850242dc64eb5374f353dcb6e1b5a01126066920a046b4d"
+    },
+    "absolute_error": {
+      "path": "figures\\Error.png",
+      "sha256": "7f623b40348bbf15ed7494652aa6c585aa34e9e5dc47639121d2c447b6534559"
+    }
+  },
+  "transformation": [
+    "Transcripción de los valores impresos a dos decimales.",
+    "Eliminación de las marcas naranjas de presentación.",
+    "Las celdas iguales a cero se dejan sin texto para reducir saturación visual.",
+    "La matriz de error se transcribe de Error.png y no se recalcula desde valores redondeados."
+  ],
+  "outputs": [
+    "figures\\bach_manual_inferred.pdf",
+    "figures\\bach_manual_inferred.png",
+    "figures\\bach_manual_reference.pdf",
+    "figures\\bach_manual_reference.png",
+    "figures\\bach_manual_absolute_error.pdf",
+    "figures\\bach_manual_absolute_error.png"
+  ]
+}

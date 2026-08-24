@@ -441,9 +441,9 @@
 	\newpage
 	\blankpage
 
-	\dedicationpage
-	
-	\acknowledgments
+	% Habilitar estas páginas cuando los archivos personales tengan contenido.
+	% \dedicationpage
+	% \acknowledgments
 	
 	\abstractpage
 	\preface

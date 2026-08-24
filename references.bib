@@ -6,6 +6,7 @@
   number  = {2},
   pages   = {257--286},
   year    = {1989},
+  doi     = {10.1109/5.18626},
 }
 @book{cappe2005,
   author    = {Capp{\'e}, Olivier and Moulines, Eric and Ryd{\'e}n, Tobias},
@@ -41,6 +42,27 @@
   year      = {2007},
   publisher = {MIT Press},
   address   = {Cambridge, MA},
+  isbn      = {9780262201667},
+}
+
+@article{pearce2012,
+  author  = {Pearce, Marcus T. and Wiggins, Geraint A.},
+  title   = {Auditory Expectation: The Information Dynamics of Music Perception and Cognition},
+  journal = {Topics in Cognitive Science},
+  volume  = {4},
+  number  = {4},
+  pages   = {625--652},
+  year    = {2012},
+  doi     = {10.1111/j.1756-8765.2012.01214.x},
+}
+
+@inproceedings{sheh2003,
+  author    = {Sheh, Alexander and Ellis, Daniel P. W.},
+  title     = {Chord Segmentation and Recognition Using {EM}-Trained Hidden Markov Models},
+  booktitle = {Proceedings of the 4th International Conference on Music Information Retrieval},
+  pages     = {185--191},
+  year      = {2003},
+  url       = {https://archives.ismir.net/ismir2003/paper/000038.pdf},
 }
 @article{raphael2002,
   author  = {Raphael, Christopher},
@@ -91,6 +113,7 @@
   number  = {476},
   pages   = {1566--1581},
   year    = {2006},
+  doi     = {10.1198/016214506000000302},
 }
 @article{heller2009,
   author  = {Heller, Katherine A. and Teh, Yee Whye and G{\"o}r{\"u}r, Dilan},
@@ -119,6 +142,7 @@
   number  = {2},
   pages   = {209--230},
   year    = {1973},
+  doi     = {10.1214/aos/1176342360},
 }
 
 @article{ishwaran2001,
@@ -152,18 +176,18 @@
 }
 
 % --- Transformers y arquitecturas alternativas (agregadas 2026-07-09) ---
-% El capitulo 5 (comparacion final HMM/HDP-HMM/Transformer) no tenia
-% ninguna referencia de esta familia. Las 8 entradas siguientes se
-% verificaron por busqueda web antes de agregarse (arXiv/ACL/ACM, ids y
-% autores confirmados); ninguna se invento.
+% Estas entradas se verificaron contra las publicaciones o los registros
+% editoriales correspondientes antes de incorporarse.
 
 @inproceedings{vaswani2017,
   author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia},
   title     = {Attention Is All You Need},
   booktitle = {Advances in Neural Information Processing Systems 30 (NeurIPS 2017)},
+  pages     = {5998--6008},
   year      = {2017},
   eprint    = {1706.03762},
   archivePrefix = {arXiv},
+  url       = {https://proceedings.neurips.cc/paper/7181-attention-is-all-you-need},
 }
 
 @inproceedings{shaw2018,
@@ -183,6 +207,29 @@
   year      = {2019},
   eprint    = {1809.04281},
   archivePrefix = {arXiv},
+  url       = {https://openreview.net/forum?id=rJe4ShAcF7},
+}
+
+% --- Modelos de secuencia y formatos simbólicos (agregadas 2026-08-24) ---
+
+@article{begleiter2004,
+  author  = {Begleiter, Ron and El-Yaniv, Ran and Yona, Golan},
+  title   = {On Prediction Using Variable Order Markov Models},
+  journal = {Journal of Artificial Intelligence Research},
+  volume  = {22},
+  pages   = {385--421},
+  year    = {2004},
+  doi     = {10.1613/jair.1491},
+}
+
+@techreport{musicxml2021,
+  author       = {{W3C Music Notation Community Group}},
+  title        = {{MusicXML} 4.0},
+  year         = {2021},
+  type         = {Final Community Group Report},
+  institution  = {World Wide Web Consortium},
+  url          = {https://www.w3.org/2021/06/musicxml40/},
+  note         = {Editado por Michael Good},
 }
 
 @inproceedings{huang2020popmusic,
@@ -228,4 +275,63 @@
   year          = {2023},
   eprint        = {2312.00752},
   archivePrefix = {arXiv},
+}
+
+% --- Corpus y protocolo estadístico de la comparación final ---
+
+@inproceedings{long2024pdmx,
+  author    = {Long, Phillip and Novack, Zachary and Berg-Kirkpatrick, Taylor and McAuley, Julian},
+  title     = {{PDMX}: A Large-Scale Public Domain {MusicXML} Dataset for Symbolic Music Processing},
+  booktitle = {ICASSP 2025 -- 2025 IEEE International Conference on Acoustics, Speech and Signal Processing},
+  pages     = {1--5},
+  year      = {2025},
+  doi       = {10.1109/ICASSP49660.2025.10890217},
+}
+
+@article{wilcoxon1945,
+  author  = {Wilcoxon, Frank},
+  title   = {Individual Comparisons by Ranking Methods},
+  journal = {Biometrics Bulletin},
+  volume  = {1},
+  number  = {6},
+  pages   = {80--83},
+  year    = {1945},
+}
+
+@article{holm1979,
+  author  = {Holm, Sture},
+  title   = {A Simple Sequentially Rejective Multiple Test Procedure},
+  journal = {Scandinavian Journal of Statistics},
+  volume  = {6},
+  number  = {2},
+  pages   = {65--70},
+  year    = {1979},
+}
+
+@article{efron1979,
+  author  = {Efron, Bradley},
+  title   = {Bootstrap Methods: Another Look at the Jackknife},
+  journal = {The Annals of Statistics},
+  volume  = {7},
+  number  = {1},
+  pages   = {1--26},
+  year    = {1979},
+  doi     = {10.1214/aos/1176344552},
+}
+
+@article{demsar2006,
+  author  = {Dem{\v{s}}ar, Janez},
+  title   = {Statistical Comparisons of Classifiers over Multiple Data Sets},
+  journal = {Journal of Machine Learning Research},
+  volume  = {7},
+  pages   = {1--30},
+  year    = {2006},
+}
+
+@book{miettinen1999,
+  author    = {Miettinen, Kaisa},
+  title     = {Nonlinear Multiobjective Optimization},
+  publisher = {Kluwer Academic Publishers},
+  address   = {Boston},
+  year      = {1999},
 }
