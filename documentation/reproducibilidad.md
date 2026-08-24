@@ -8,12 +8,12 @@ Este documento vincula el manuscrito con el estado verificable del repositorio e
 - Remoto: `https://github.com/JanusAdamus/Melodies.git`.
 - Commit remoto utilizado: `b11a2731a6fb3c812dc0bfd0831b7b065a016142` (`experiment tunint`).
 - Reporte versionado de la corrida: `docs/resultados-comparacion-3000.md` en ese commit.
-- Rama local de `D:\Melodies`: `master` en `d8d3bc6`; conserva 7 commits propios y está 19 commits detrás de `origin/master`.
-- Decisión de integración: no se fusionó la historia divergente. El manuscrito consulta el objeto Git remoto por commit exacto.
+- La rama local divergente `master` se conservó sin fusionar. Para las acciones pendientes se creó `codex/plan-auditoria-comparacion` directamente desde `origin/master` en `b11a273`.
+- Plan de trabajo experimental: `docs/superpowers/plans/2026-08-24-auditoria-comparacion-final.md` en esa rama.
 - Repositorio del manuscrito: `D:\Tesis`, rama `master`.
 - Estado remoto previo a esta actualización: `853b928`, sin ramas adicionales publicadas. No se localizaron en GitHub los diagramas previos mencionados por el autor.
 
-La divergencia de `D:\Melodies` es material. Cualquier reproducción debe declarar si usa la rama local `d8d3bc6`, el remoto `b11a273` o una integración posterior; no son estados intercambiables.
+La divergencia de la antigua rama local `master` sigue siendo material. La reproducción y el plan de correcciones toman como base explícita `b11a273`; una integración posterior debe conservar esa procedencia y no tratar ambos historiales como estados intercambiables.
 
 ## Corrida principal
 
@@ -109,9 +109,9 @@ El estado remoto corrige o amplía el protocolo anterior en varios puntos:
 2. VOMM se incorpora como control diagnóstico con órdenes candidatos 1, 2, 4 y 8;
 3. BOS es contexto y no objetivo, mientras que PAD queda fuera de la distribución puntuada;
 4. `protocol_audit.json` comprueba cobertura, orden, omisiones y duplicados por obra;
-5. la inferencia de la fracción completa produce seis comparaciones, con *bootstrap*, Wilcoxon y Holm;
+5. la inferencia de la fracción completa produce seis comparaciones: intervalos *bootstrap* marginales para la diferencia media y valores \(p\) de Wilcoxon ajustados mediante Holm;
 6. el truncamiento del HDP-HMM baja de 40 a 24, con ocupación efectiva observada entre 14 y 17 estados;
-7. la caché respeta la selección actual de archivos y la reanudación tolera una última línea incompleta de *checkpoint*;
+7. la caché respeta la selección actual de archivos y la reanudación tolera una última línea incompleta de *checkpoint*; este archivo conserva resultados de celdas completas, no pesos de los modelos;
 8. las rutas vectorizadas de HMM y HDP-HMM tienen pruebas de regresión contra las formulaciones previas.
 
 Las pruebas unitarias y de regresión respaldan contratos de software. No se presentan como evidencia musical ni sustituyen la corrida principal.
@@ -124,6 +124,10 @@ Las pruebas unitarias y de regresión respaldan contratos de software. No se pre
 - El VOMM cambia de orden seleccionado dentro de la curva; parte de su pendiente refleja un cambio de capacidad.
 - No hubo anotaciones estructurales. La frontera de Pareto disponible es predictiva-costo y explícitamente parcial.
 - La comparación temporal mezcla GPU para el transformador y CPU para los modelos clásicos.
+- Los tiempos de HMM, HDP-HMM y VOMM incluyen búsquedas de tres, tres y cuatro candidatos, respectivamente; el transformador conserva una arquitectura y selecciona la época mediante detención temprana.
+- El transformador usa ventanas de entrenamiento de longitud máxima 128 y desplazamiento 64. La evaluación es común y no solapada, pero el número efectivo de exposiciones de entrenamiento difiere de los modelos clásicos.
+- Los intervalos cuantifican variación entre obras dentro de una sola partición; no incluyen incertidumbre entre particiones o muestras alternativas del corpus.
+- La obra canónica se construye mediante una normalización heurística de compositor y título. La ausencia de cruces entre identificadores comprueba consistencia interna, no la identidad musical de todas las variantes.
 
 ## Recuperación y auditoría pendientes
 
@@ -134,6 +138,7 @@ Al recuperar los artefactos primarios se debe verificar, como mínimo:
 3. que ninguna obra canónica cruce entre entrenamiento, validación y prueba;
 4. que la auditoría cubra cada evento exactamente una vez por modelo;
 5. que las 105 filas correspondan al plan y que la fracción completa no se interprete como tres muestras de datos distintas;
-6. que los seis contrastes usen 414 obras válidas por par y promedien primero dentro de obra;
-7. que `structural_evaluation.json` permanezca en `not_evaluated` si no se añaden anotaciones;
-8. que tablas, prosa y cualquier figura futura coincidan con los CSV y JSON recuperados.
+6. que los seis contrastes usen 414 obras canónicas válidas por par y promedien primero dentro de obra;
+7. cómo se relacionan las 424 piezas de prueba con las 414 obras canónicas, distinguiendo agrupación de variantes y exclusiones por métricas no finitas;
+8. que `structural_evaluation.json` permanezca en `not_evaluated` si no se añaden anotaciones;
+9. que tablas, prosa y cualquier figura futura coincidan con los CSV y JSON recuperados.

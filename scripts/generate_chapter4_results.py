@@ -128,7 +128,7 @@ Modelo & $0.10$ & $0.25$ & $0.50$ & $0.75$ & $1.00$ & Cambio $0.10\\to1.00$ \\\\
         output_dir / "chapter4_cost_results.tex",
         """\\begin{tabular}{lrrrr}
 \\hline
-Modelo & Parámetros & Ajuste (s) & Evaluación (s) & NLL \\\\
+Modelo & Parámetros & Selección y ajuste (s) & Evaluación (s) & NLL \\\\
 \\hline
 """ + "\n".join(cost_lines) + "\n\\hline\n\\end{tabular}",
         ref,

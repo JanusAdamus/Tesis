@@ -11,8 +11,9 @@ Repeticiones & Semillas de modelo $1$ y $2$; en la fracción completa las semill
 HMM finito & Selección entre $12$, $24$ y $48$ estados; máximo de $100$ iteraciones \\
 HDP-HMM truncado & Cota $K=24$; $120$ iteraciones; calentamiento de $60$; tres configuraciones de hiperparámetros \\
 Transformador & Tres capas; dimensión $128$; cuatro cabezas; dimensión intermedia $256$; hasta $25$ épocas con detención temprana \\
+Ventanas del transformador & Entrenamiento con longitud máxima $128$ y desplazamiento $64$; validación y prueba sin solapamiento, con desplazamiento $128$ \\
 VOMM & Control diagnóstico; selección por validación entre órdenes $1$, $2$, $4$ y $8$ \\
 Métrica primaria & NLL de prueba por token; se comprobó que la cobertura fuera idéntica entre modelos \\
-Medidas complementarias & \emph{perplexity}, tiempo, parámetros, seis diferencias pareadas, intervalo \emph{bootstrap} y ajuste de Holm \\
+Medidas complementarias & \emph{perplexity}, tiempo, parámetros, seis diferencias pareadas, intervalo \emph{bootstrap} marginal y valores $p$ de Wilcoxon ajustados mediante Holm \\
 \hline
 \end{tabular}
