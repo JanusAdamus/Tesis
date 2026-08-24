@@ -5,14 +5,14 @@ Componente & Configuración ejecutada \\
 Tarea & Predicción autorregresiva de la siguiente clase de altura \\
 Representación & \texttt{pitch\_class}; sin silencios, sin transposición y con preferencia por la voz aguda \\
 Partición primaria & $75\%$ entrenamiento, $10\%$ validación y $15\%$ prueba; agrupación por obra canónica; semilla $7$ \\
-Corpus & Muestra de $3000$ archivos de PDMX; semilla de muestreo $7$; $2933$ piezas preparadas \\
+Corpus & Muestra de $3000$ archivos de PDMX; semilla de muestreo $7$; $2933$ piezas utilizables tras el preprocesamiento \\
 Curva de aprendizaje & Fracciones $0.10$, $0.25$, $0.50$, $0.75$ y $1.00$; semillas de datos $1$, $2$ y $3$; subconjuntos anidados por obra \\
 Repeticiones & Semillas de modelo $1$ y $2$; en la fracción completa las semillas de datos repiten el mismo subconjunto y no constituyen réplicas independientes \\
 HMM finito & Selección entre $12$, $24$ y $48$ estados; máximo de $100$ iteraciones \\
-HDP-HMM truncado & Truncamiento $24$; $120$ iteraciones; calentamiento de $60$; tres configuraciones de hiperparámetros \\
+HDP-HMM truncado & Cota $K=24$; $120$ iteraciones; calentamiento de $60$; tres configuraciones de hiperparámetros \\
 Transformador & Tres capas; dimensión $128$; cuatro cabezas; dimensión intermedia $256$; hasta $25$ épocas con detención temprana \\
 VOMM & Control diagnóstico; selección por validación entre órdenes $1$, $2$, $4$ y $8$ \\
-Métrica primaria & NLL de prueba por token con cobertura idéntica auditada \\
-Medidas complementarias & \emph{Perplexity}, tiempo, parámetros, seis diferencias pareadas, intervalo \emph{bootstrap} y ajuste de Holm \\
+Métrica primaria & NLL de prueba por token; se comprobó que la cobertura fuera idéntica entre modelos \\
+Medidas complementarias & \emph{perplexity}, tiempo, parámetros, seis diferencias pareadas, intervalo \emph{bootstrap} y ajuste de Holm \\
 \hline
 \end{tabular}

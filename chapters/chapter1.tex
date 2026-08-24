@@ -50,7 +50,7 @@ donde $X_n$ es la clase de altura observada en la posición $n$. Tratar $X_n$ co
 
 \section{Dependencia local y cadenas de Markov}
 
-El modelo más simple asignaría a cada posición la misma distribución, con independencia de las notas anteriores. Esa hipótesis pierde la continuidad local que motivó la representación. En el extremo opuesto, condicionar cada nota a toda la historia previa produce un número de contextos que crece rápidamente y resulta difícil de estimar con datos limitados. La cadena de Markov de primer orden adopta una posición intermedia: conserva la nota presente y descarta el resto del pasado al calcular la siguiente transición.
+El modelo más simple asignaría a cada posición la misma distribución, con independencia de las notas anteriores. Esa hipótesis no representa la continuidad local que motivó la secuencia. En el extremo opuesto, condicionar cada nota a toda la historia previa produce un número de contextos que crece rápidamente y resulta difícil de estimar con datos limitados. La cadena de Markov de primer orden adopta una posición intermedia: conserva la nota presente y descarta el resto del pasado al calcular la siguiente transición.
 
 \begin{Definicion}
 Sea $(\Omega,\mathcal{F},\mathbb{P})$ un espacio de probabilidad. Una sucesión de variables aleatorias $(X_n)_{n\geq 1}$ con valores en un conjunto finito $S$ es una \emph{cadena de Markov} si, para todo $n\geq 1$ y para cualesquiera $i_1,\ldots,i_n,j\in S$ con probabilidad condicionante positiva,
@@ -61,7 +61,7 @@ P(X_{n+1}=j\mid X_n=i_n).
 \]
 \end{Definicion}
 
-En el modelo melódico de primer orden, esta igualdad significa que la nota actual resume el contexto utilizado para predecir la siguiente. La música puede contener motivos, frases y dependencias a mayor distancia, pero la cadena no los representa de forma directa. Se trata de una simplificación deliberada cuyo efecto puede medirse frente a modelos que conservan más contexto.
+En el modelo melódico de primer orden, esta igualdad significa que la nota actual resume el contexto utilizado para predecir la siguiente. La música puede contener motivos, frases y dependencias a mayor distancia, pero la cadena no los representa de forma directa. Se trata de una simplificación deliberada cuyo efecto puede evaluarse al compararla con modelos que conservan más contexto.
 
 Si la cadena es homogénea, la probabilidad de pasar de $i$ a $j$ no depende de $n$ y se denota por
 \[
@@ -85,10 +85,10 @@ En una cadena finita, irreducible y aperiódica, existe una única distribución
 \[
 \lim_{n\to\infty}P(X_n=j\mid X_1=i)=\pi_j.
 \]
-Bajo esas condiciones, $\pi_j$ describe la probabilidad a largo plazo del símbolo $j$ dentro del modelo. Esta interpretación pertenece a la cadena estimada; no basta por sí sola para identificar tonalidad, función armónica o estilo.
+Bajo esas condiciones, $\pi_j$ describe la probabilidad a largo plazo del símbolo $j$ dentro del modelo. Se trata de una propiedad de la cadena estimada y no basta por sí sola para identificar tonalidad, función armónica o estilo.
 
 \section{De la nota observable al contexto latente}
 
-En la cadena descrita hasta ahora, cada nota es a la vez observación y estado. Esto permite describir qué notas suelen sucederse, pero no un contexto que permanezca mientras cambian las observaciones. Una misma nota puede aparecer en regiones armónicas distintas y un mismo acorde puede admitir varias notas. La nota actual, por tanto, no determina de manera unívoca la organización que se desea estudiar \cite{temperley2007}.
+En la cadena descrita hasta ahora, cada nota es a la vez observación y estado. Esto permite describir qué notas suelen sucederse, pero no permite representar un contexto que permanezca mientras cambian las observaciones. Una misma nota puede aparecer en regiones armónicas distintas y un mismo acorde puede admitir varias notas. La nota actual, por tanto, no determina de manera unívoca la organización que se desea estudiar \cite{temperley2007}.
 
-Para conservar ese contexto se separan los dos niveles. La nota pasa a ser la observación y una segunda variable representa el contexto latente que evoluciona en el tiempo. El contexto inferido puede examinarse como candidato armónico o estructural, aunque el modelo no le asigna automáticamente una etiqueta musical. El Capítulo~\ref{chap:hmm} formaliza esta idea mediante una cadena de Markov oculta y presenta los algoritmos para evaluar, aprender y decodificar el modelo.
+Para conservar ese contexto se separan los dos niveles. La nota pasa a ser la observación y una segunda variable representa el contexto latente que evoluciona en el tiempo. El contexto inferido puede estudiarse para determinar si corresponde a una región armónica o estructural, aunque el modelo no le asigna automáticamente una etiqueta musical. El Capítulo~\ref{chap:hmm} formaliza esta idea mediante una cadena de Markov oculta y presenta los algoritmos para evaluar, aprender y decodificar el modelo.

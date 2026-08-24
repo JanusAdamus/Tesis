@@ -9,7 +9,7 @@ Esa pregunta permite establecer una base común, aunque sólo cubre una parte de
 
 Se incorpora también un modelo de Markov de orden variable, o VOMM por sus siglas en inglés \cite{begleiter2004}. A diferencia del HMM de primer orden, el VOMM puede consultar varios eventos observados del pasado; a diferencia del transformador, lo hace mediante tablas explícitas de conteos. Sirve así como punto de comparación para estimar cuánta mejora predictiva puede obtenerse con memoria local antes de recurrir a una arquitectura neuronal.
 
-La Figura~\ref{fig:chapter4-evaluation-focus} muestra la relación entre las dos preguntas. Los cuatro modelos reciben la misma representación y predicen el siguiente evento. El HMM finito y el HDP-HMM producen, además, trayectorias latentes que podrían utilizarse en un análisis estructural. Esas trayectorias pueden proponer una segmentación, pero no constituyen segmentaciones de referencia.
+La Figura~\ref{fig:chapter4-evaluation-focus} muestra la relación entre las dos preguntas. Los cuatro modelos reciben la misma representación y predicen el siguiente evento. El HMM finito y el HDP-HMM producen, además, trayectorias latentes que podrían utilizarse en un análisis estructural. A partir de ellas puede proponerse una segmentación, pero no constituyen segmentaciones de referencia.
 
 \begin{figure}[H]
 \centering
@@ -68,9 +68,9 @@ Considérese un segmento de prueba $y_1,\ldots,y_T$. En cada posición $t$, el m
 \]
 La penalización disminuye cuando el modelo concentra mayor probabilidad en los eventos observados. Valores menores de NLL y \emph{perplexity} indican, por tanto, mejor predicción. Las dos cantidades expresan la misma información en escalas distintas; la \emph{perplexity} facilita la lectura, pero no aporta una segunda fuente independiente de evidencia.
 
-Usar la misma fórmula no basta para garantizar una comparación equitativa: los modelos deben puntuar exactamente los mismos eventos. El símbolo de inicio se utiliza como contexto, pero no cuenta como una nota adicional que deba predecirse. El símbolo de relleno del transformador también queda fuera de la distribución evaluada. Los conjuntos de validación y prueba se dividen en segmentos no superpuestos de hasta $128$ eventos, incluida la cola final aunque sea corta. Cada nota de prueba se puntúa una sola vez, con los mismos reinicios de contexto en las cuatro familias.
+Usar la misma fórmula no basta para garantizar una comparación equitativa: los modelos deben puntuar exactamente los mismos eventos. El símbolo de inicio se utiliza como contexto, pero no cuenta como una nota adicional que deba predecirse. El símbolo de relleno del transformador tampoco se incluye entre los eventos puntuados. Los conjuntos de validación y prueba se dividen en segmentos no superpuestos de hasta $128$ eventos, incluida la cola final aunque sea corta. Cada nota de prueba se puntúa una sola vez, con los mismos reinicios de contexto en las cuatro familias.
 
-La tarea común tiene un alcance limitado. La clase de altura conserva la identidad de la nota módulo octava, pero omite duración, registro, dinámica y buena parte de la organización métrica. El experimento estudia regularidad secuencial sobre un alfabeto compartido, no toda la información de la partitura.
+La tarea común tiene un alcance limitado. La clase de altura conserva la identidad de la nota módulo octava, pero omite duración, registro, dinámica y buena parte de la organización métrica. El experimento estudia regularidades secuenciales en un alfabeto compartido, no toda la información de la partitura.
 
 \section{Cómo se construye la comparación}
 
@@ -80,7 +80,7 @@ Sobre esa partición se construyen subconjuntos anidados con el $10\%$, $25\%$, 
 
 En la fracción completa, cambiar la semilla de datos ya no cambia el subconjunto. Las tres filas correspondientes contienen el mismo acervo y no son tres muestras independientes. La repetición no altera la comparación pareada por obra, pero la dispersión del último punto de la curva debe leerse con cautela.
 
-Las configuraciones se seleccionan únicamente con validación. El HMM finito compara $12$, $24$ y $48$ estados, mientras que el HDP-HMM permite hasta $24$ estados latentes y contrasta tres combinaciones de hiperparámetros. El transformador conserva una arquitectura pequeña de tres capas y dimensión interna $128$. Para el VOMM se comparan los órdenes $1$, $2$, $4$ y $8$. La Tabla~\ref{tab:chapter4-experimental-protocol} reúne la configuración de la corrida.
+Las configuraciones se seleccionan únicamente con validación. Para el HMM finito se comparan $12$, $24$ y $48$ estados, mientras que para el HDP-HMM se fija una cota de $24$ estados latentes y se contrastan tres combinaciones de hiperparámetros. El transformador conserva una arquitectura pequeña de tres capas y dimensión interna $128$. Para el VOMM se comparan los órdenes $1$, $2$, $4$ y $8$. La Tabla~\ref{tab:chapter4-experimental-protocol} reúne la configuración de la corrida.
 
 \begin{table}[H]
 \centering
@@ -89,15 +89,15 @@ Las configuraciones se seleccionan únicamente con validación. El HMM finito co
 \resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_experimental_protocol}}
 \end{table}
 
-El análisis final conserva la obra como unidad de comparación. Primero se promedian las variantes y repeticiones de una misma obra. Después se calcula, para cada par de modelos, la diferencia de NLL sobre las mismas piezas. De este modo, cada obra aporta un punto y una pieza larga no se convierte, por su número de notas, en centenares de observaciones independientes. El intervalo \emph{bootstrap} aproxima la incertidumbre mediante $10\,000$ remuestreos de las obras. La prueba de rangos con signo de Wilcoxon utiliza el signo y el orden de las diferencias pareadas, y el ajuste de Holm toma en cuenta que se examinan seis pares a la vez \cite{wilcoxon1945,holm1979,efron1979,demsar2006}.
+El análisis final toma la obra como unidad de comparación. Primero se promedian las variantes y repeticiones de una misma obra. Después se calcula, para cada par de modelos, la diferencia de NLL sobre las mismas piezas. De este modo, cada obra aporta un punto y una pieza larga no se convierte, por su número de notas, en centenares de observaciones independientes. La incertidumbre se estima con un intervalo \emph{bootstrap} obtenido mediante $10\,000$ remuestreos de las obras. La prueba de rangos con signo de Wilcoxon utiliza el signo y el orden de las diferencias pareadas, y el ajuste de Holm toma en cuenta que se examinan seis pares a la vez \cite{wilcoxon1945,holm1979,efron1979,demsar2006}.
 
 \subsection{Comprobaciones previas}
 
-Una diferencia entre modelos sólo es interpretable si todos resuelven la misma tarea. En la corrida final, el símbolo de inicio del VOMM funciona como contexto y el relleno del transformador queda fuera de la distribución puntuada. Una auditoría compara, obra por obra, los eventos esperados con los evaluados. Cualquier omisión, duplicación o alteración del orden invalida la corrida; no se corrige modificando el denominador.
+Una diferencia entre modelos sólo es interpretable si todos resuelven la misma tarea. En la corrida final, el símbolo de inicio del VOMM funciona como contexto y el relleno del transformador queda fuera del cálculo de la puntuación. Una auditoría compara, obra por obra, los eventos esperados con los evaluados. Cualquier omisión, duplicación o alteración del orden invalida la corrida; no se corrige modificando el denominador.
 
 El programa conserva el modelo elegido por validación, puede reanudarse aun cuando la última línea de un \emph{checkpoint} esté incompleta y reutiliza la caché para muestras menores. Los cálculos reescalados y vectorizados de ambos HMM se contrastan mediante pruebas de regresión con las versiones que operan en dominio logarítmico. Estas comprobaciones verifican que la corrida cumpla las condiciones computacionales previstas; no constituyen un resultado musical.
 
-\section{La corrida completada sobre PDMX}
+\section{La corrida final con PDMX}
 
 La corrida \texttt{tesis\_3000\_gpu\_20260823\_1941} terminó el 23 de agosto de 2026. Se muestrearon $3000$ archivos del corpus PDMX con semilla $7$ \cite{long2024pdmx}. El preprocesamiento dejó $2933$ piezas utilizables y excluyó $67$, para un total de $693\,754$ eventos. El conjunto de prueba reunió $424$ piezas. En la fracción completa, el entrenamiento utilizó $2173$ piezas y $500\,959$ eventos.
 
@@ -143,7 +143,7 @@ La calidad predictiva no describe por sí sola el costo de obtenerla. La Tabla~\
 
 \begin{table}[H]
 \centering
-\caption{Costo medio observado en la fracción completa. Los tiempos de pared se midieron en dispositivos distintos y no constituyen una comparación neutral del hardware.}
+\caption{Costo medio observado en la fracción completa. Los tiempos reales de ejecución se midieron en dispositivos distintos y no constituyen una comparación neutral del hardware.}
 \label{tab:chapter4-cost-results}
 \resizebox{0.86\textwidth}{!}{\input{chapters/tables/chapter4_cost_results}}
 \begin{flushleft}
@@ -161,6 +161,6 @@ La NLL indica qué modelo asigna mayor probabilidad a las notas de prueba, pero 
 
 La corrida no dispuso del archivo de referencia y el artefacto estructural registró \texttt{not\_evaluated}. Por ello no se calcularon esas métricas. La atención del transformador y los estados de los HMM siguen siendo hipótesis de organización: la menor NLL o la existencia de una trayectoria no demuestran que se hayan recuperado frases, secciones o funciones armónicas.
 
-La comparación predictiva también tiene límites concretos. Debe ampliarse la rejilla del HMM finito más allá de $48$ estados y repetirse la comparación con otra semilla de partición. Para obtener tiempos comparables entre dispositivos habría que usar recursos equivalentes. Falta también recuperar y preservar los CSV y JSON originales de la corrida. Las tablas actuales pueden regenerarse desde el reporte versionado, lo que conserva la trazabilidad, pero no sustituye una auditoría directa de los artefactos primarios.
+La comparación predictiva también tiene límites concretos. Debe ampliarse la rejilla del HMM finito más allá de $48$ estados y repetirse la comparación con otra semilla de partición. Para obtener tiempos comparables entre dispositivos habría que usar recursos equivalentes. Falta también recuperar y preservar los CSV y JSON originales de la corrida. Las tablas actuales pueden regenerarse a partir del informe conservado en el repositorio. Esto permite rastrear su procedencia, pero no sustituye una auditoría directa de los archivos originales.
 
-En la corrida estudiada, el transformador obtiene la menor \emph{perplexity} desde la fracción $0.25$, y su diferencia frente a los otros modelos aumenta al incorporar más obras. Bajo las configuraciones evaluadas, el HMM finito predice mejor que el HDP-HMM entre los modelos de estados latentes; el VOMM ofrece el ajuste más rápido, pero no la mejor predicción. Estos resultados no permiten ordenar los modelos por su capacidad para representar la organización musical hasta que se incorpore la referencia estructural faltante.
+En la corrida estudiada, el transformador obtiene la menor \emph{perplexity} desde la fracción $0.25$, y su diferencia frente a los otros modelos aumenta al incorporar más obras. Con las configuraciones evaluadas, el HMM finito predice mejor que el HDP-HMM entre los modelos de estados latentes; el VOMM ofrece el ajuste más rápido, pero no la mejor predicción. Estos resultados no permiten ordenar los modelos por su capacidad para representar la organización musical hasta que se incorpore la referencia estructural faltante.

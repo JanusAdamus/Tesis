@@ -48,7 +48,7 @@ En consecuencia,
 \[
 \lvert S\rvert = 12\times 21 = 252.
 \]
-El ejemplo produce $252$ acordes posibles antes de observar una sola nota. Los experimentos no utilizan esa lista como etiquetas verdaderas: los estados latentes permanecen sin nombre y las observaciones son clases de altura. El cálculo muestra que un vocabulario musical razonable puede crecer con rapidez sin indicar cuántos estados necesita una obra concreta. Conviene entonces separar el número de estados disponibles del número que el modelo ocupa.
+El vocabulario resultante contiene $252$ acordes posibles antes de observar una sola nota. Los experimentos no utilizan esa lista como etiquetas verdaderas: los estados latentes permanecen sin nombre y las observaciones son clases de altura. El cálculo muestra que un vocabulario musical razonable puede crecer con rapidez sin indicar cuántos estados necesita una obra concreta. Conviene entonces separar el número de estados disponibles del número que el modelo utiliza.
 
 \section{Del número fijo a una colección abierta de estados}
 
@@ -125,6 +125,60 @@ El alfabeto observable no necesita crecer junto con los estados. Si $\mathcal{V}
 
 El calificativo ``infinito'' describe la colección disponible, no el número de estados que aparecerán en una obra finita. Una trayectoria de longitud $T$ puede visitar, como máximo, $T$ estados y normalmente utiliza muchos menos. El modelo evita decidir esa cantidad antes del ajuste, aunque los estados obtenidos siguen siendo categorías estadísticas sin una etiqueta musical garantizada. Para interpretarlos deben examinarse sus emisiones, sus transiciones y su correspondencia con una referencia externa.
 
+La Figura~\ref{fig:ihmm-truncamiento} separa las dos ideas que suele confundir el término ``infinito''. El modelo ideal admite una colección numerable de estados potenciales, pero una trayectoria finita sólo visita algunos. El truncamiento reemplaza esa colección por una cota $K$ que puede almacenarse y deja que parte de esos $K$ estados permanezca sin utilizar.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    scale=0.88,
+    transform shape,
+    >=latex,
+    state/.style={circle, draw, minimum size=0.72cm, fill=black!10},
+    unused/.style={circle, draw, dashed, minimum size=0.72cm},
+    step/.style={circle, draw, minimum size=0.62cm},
+    arrow/.style={->, thick}
+]
+\draw[rounded corners, fill=black!2] (-6.4,-1.75) rectangle (-0.25,2.05);
+\draw[rounded corners, fill=black!2] (0.25,-1.75) rectangle (6.4,2.05);
+
+\node[font=\bfseries] at (-3.325,1.72) {Colección numerable};
+\node[state] (i1) at (-5.55,0.85) {$1$};
+\node[state] (i2) at (-4.45,0.85) {$2$};
+\node[state] (i3) at (-3.35,0.85) {$3$};
+\node[state] (i4) at (-2.25,0.85) {$4$};
+\node at (-1.15,0.85) {$\cdots$};
+\node[font=\small] at (-3.325,0.15) {estados potenciales};
+
+\node[step] (it1) at (-5.25,-0.75) {$2$};
+\node[step] (it2) at (-4.0,-0.75) {$1$};
+\node[step] (it3) at (-2.75,-0.75) {$3$};
+\node[step] (it4) at (-1.5,-0.75) {$2$};
+\draw[arrow] (it1) -- (it2);
+\draw[arrow] (it2) -- (it3);
+\draw[arrow] (it3) -- (it4);
+\node[font=\small] at (-3.325,-1.38) {trayectoria finita};
+
+\node[font=\bfseries] at (3.325,1.72) {Aproximación truncada};
+\node[state] (k1) at (1.1,0.85) {$1$};
+\node[state] (k2) at (2.2,0.85) {$2$};
+\node[state] (k3) at (3.3,0.85) {$3$};
+\node at (4.35,0.85) {$\cdots$};
+\node[unused] (kk) at (5.55,0.85) {$K$};
+\node[font=\small] at (3.325,0.15) {cota computacional};
+
+\node[step] (kt1) at (1.4,-0.75) {$2$};
+\node[step] (kt2) at (2.65,-0.75) {$1$};
+\node[step] (kt3) at (3.9,-0.75) {$3$};
+\node[step] (kt4) at (5.15,-0.75) {$2$};
+\draw[arrow] (kt1) -- (kt2);
+\draw[arrow] (kt2) -- (kt3);
+\draw[arrow] (kt3) -- (kt4);
+\node[font=\small] at (3.325,-1.38) {estados utilizados $<K$};
+\end{tikzpicture}
+\caption{Diferencia entre el iHMM ideal y su aproximación truncada. Los círculos superiores representan estados disponibles; la trayectoria inferior utiliza sólo una parte. En el panel derecho, el trazo discontinuo señala un estado disponible que puede quedar sin ocupar.}
+\label{fig:ihmm-truncamiento}
+\end{figure}
+
 
 
 \section{Del modelo infinito a un cálculo finito}
@@ -163,19 +217,19 @@ Y_t\mid X_t=i,\phi_i\sim \mathrm{Cat}(\phi_i), \qquad t\geq 1.
 \]
 \end{Definicion}
 
-La notación distingue la cota computacional de los estados que la trayectoria ocupa. Dentro de esa cota, $\beta$ reparte el peso global entre los $K$ estados; $\gamma$ influye en cómo se distribuye ese peso; $\alpha_0$ regula la distribución inicial y $\alpha$ permite que cada renglón de transición se aparte del patrón global. El parámetro $\kappa$ puede favorecer la permanencia en el mismo estado, mientras que $\eta$ controla la concentración de las emisiones sobre el alfabeto observable.
+La notación distingue la cota computacional del número de estados utilizados por la trayectoria. Dentro de esa cota, $\beta$ reparte el peso global entre los $K$ estados; $\gamma$ influye en cómo se distribuye ese peso; $\alpha_0$ regula la distribución inicial y $\alpha$ permite que cada renglón de transición se aparte del patrón global. El parámetro $\kappa$ puede favorecer la permanencia en el mismo estado, mientras que $\eta$ controla la concentración de las emisiones sobre el alfabeto observable.
 
 Una vez fijado $K$, las transiciones y emisiones vuelven a representarse mediante matrices finitas. Para una secuencia de longitud $T$, el costo dominante es del orden de $O(TK^2)$, pues en cada posición deben considerarse transiciones entre pares de estados. Por ello, una cota innecesariamente grande aumenta el costo de cálculo. Una cota demasiado pequeña, en cambio, puede limitar el ajuste.
 
-En los experimentos se denomina \emph{estado efectivo} a un estado que aparece ocupado en la trayectoria inferida. Este conteo permite comprobar si el modelo utiliza una parte pequeña de la cota disponible, pero no mide por sí mismo la calidad musical. Dos estados efectivos pueden separar contextos útiles o dividir arbitrariamente una misma región; esa diferencia sólo puede establecerse mediante interpretación o anotaciones externas.
+En los experimentos se denomina \emph{estado efectivo} a cualquiera de los estados presentes en la trayectoria inferida. Este conteo permite comprobar si el modelo utiliza una parte pequeña de la cota disponible, pero no mide por sí mismo la calidad musical. Dos estados efectivos pueden separar contextos útiles o dividir arbitrariamente una misma región; esa diferencia sólo puede establecerse mediante interpretación o anotaciones externas.
 
-En esta tesis, las observaciones son clases de altura y el iHMM conserva un papel conceptual. El HDP-HMM truncado es la realización computacional que se ajusta con las obras y se compara con el HMM finito. La comparación comienza con una pieza extensa, cuya trayectoria puede examinarse antes de resumir los resultados del corpus.
+En esta tesis, las observaciones son clases de altura y el iHMM conserva un papel conceptual. El HDP-HMM truncado es la versión computacional que se ajusta con los datos de las obras y se compara con el HMM finito. La comparación comienza con una pieza extensa, cuya trayectoria puede examinarse antes de resumir los resultados del corpus.
 
 \section{De una obra al corpus}
 
-El caso ilustrativo es el tercer movimiento de la Sonata no.\ 14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud permite observar con detalle las diferencias entre trayectorias y entender los resultados que después se resumen. Este análisis sólo tiene carácter ilustrativo, pues una obra no constituye evidencia general a favor de un modelo.
+El caso ilustrativo es el tercer movimiento de la Sonata núm.~14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud permite observar con detalle las diferencias entre trayectorias y entender los resultados que después se resumen. Este análisis sólo tiene carácter ilustrativo, pues una obra no constituye evidencia general a favor de un modelo.
 
-Las tablas y figuras proceden de exportaciones versionadas de corridas anteriores. El repositorio conserva el código que las generó, pero no sus CSV primarios; las cifras pueden cotejarse con las exportaciones incluidas, aunque una reproducción completa exige recuperar esos artefactos.
+Las tablas y figuras proceden de exportaciones conservadas de corridas anteriores. El repositorio contiene el código que las generó, pero no sus CSV primarios; las cifras pueden cotejarse con las exportaciones incluidas, aunque una reproducción completa exige recuperar esos archivos.
 
 La Tabla~\ref{tab:single-anchor} compara log-verosimilitud, estados ocupados y segmentos contiguos de la trayectoria. Un segmento es una sucesión de posiciones consecutivas a las que el modelo asigna el mismo estado; un cambio de estado inicia el siguiente. Para una misma secuencia, una log-verosimilitud mayor, es decir, menos negativa, indica que el modelo asigna más probabilidad a las observaciones. La magnitud depende de la longitud de la pieza, de modo que estos valores no deben compararse directamente entre obras de tamaños distintos.
 
@@ -184,7 +238,7 @@ La Tabla~\ref{tab:single-anchor} compara log-verosimilitud, estados ocupados y s
 \small
 \setlength{\tabcolsep}{4pt}
 \input{chapters/tables/chapter3_single_anchor}
-\caption{Comparación entre el HMM finito y el HDP-HMM truncado sobre la obra ancla: el tercer movimiento de la Sonata no.\ 14 de Beethoven.}
+\caption{Comparación entre el HMM finito y el HDP-HMM truncado en la obra de referencia: el tercer movimiento de la Sonata núm.~14 de Beethoven.}
 \label{tab:single-anchor}
 \end{table}
 
@@ -194,7 +248,7 @@ El resultado todavía puede depender de las particularidades de la sonata. Para 
 
 \subsection{Resultados sobre un subconjunto clásico}
 
-La comparación controlada utiliza las seis piezas breves de la Tabla~\ref{tab:corpus-clasico-limitado}. Las observaciones son clases de altura. Para el HDP-HMM se fija $K=12$, con $\alpha=8$, $\alpha_0=4$, $\gamma=2$, $\eta=1$ y $\kappa=0$. La inferencia realiza veinte iteraciones, descarta las diez primeras como calentamiento y utiliza semilla $7$. Estos valores documentan la configuración de la corrida, pero no constituyen una búsqueda exhaustiva de hiperparámetros ni sustituyen los artefactos primarios faltantes.
+La comparación controlada utiliza las seis piezas breves de la Tabla~\ref{tab:corpus-clasico-limitado}. Las observaciones son clases de altura. Para el HDP-HMM se fija $K=12$, con $\alpha=8$, $\alpha_0=4$, $\gamma=2$, $\eta=1$ y $\kappa=0$. Se realizan veinte iteraciones de inferencia, se descartan las diez primeras como calentamiento y se utiliza la semilla $7$. Estos valores documentan la configuración de la corrida, pero no constituyen una búsqueda exhaustiva de hiperparámetros ni sustituyen los artefactos primarios faltantes.
 
 \begin{table}[H]
 \centering
@@ -270,7 +324,7 @@ El resultado es descriptivo y se limita a seis piezas: ni la log-verosimilitud n
 
 \subsection{Resultados sobre el corpus extendido}
 
-El corpus extendido incorpora obras más largas y una tradición musical distinta. Reúne repertorio occidental identificado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}; la Tabla~\ref{tab:corpus-extendido} resume su composición. Ambos repertorios se mantienen identificados por su procedencia. Incluirlos en una misma evaluación no supone que compartan la misma teoría armónica.
+El corpus extendido incorpora obras más largas y una tradición musical distinta. Reúne repertorio occidental identificado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}; la Tabla~\ref{tab:corpus-extendido} resume su composición. En el análisis se conserva la procedencia de cada obra. Incluir ambos repertorios en una misma evaluación no supone que compartan la misma teoría armónica.
 
 \begin{table}[H]
 \centering
@@ -339,7 +393,7 @@ La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} resume otros dos aspectos
 \includegraphics[width=\linewidth]{figures/chapter3/multicorpus_state_counts_scatter.png}
 \caption{Comparación del número de estados utilizados por ambos modelos.}
 \end{subfigure}
-\caption{Mayores ganancias de log-verosimilitud y ocupación latente en el corpus extendido. El panel superior muestra una selección de quince obras; el inferior conserva los casos con cuentas disponibles para ambos modelos.}
+\caption{Mayores ganancias de log-verosimilitud y ocupación latente en el corpus extendido. El panel superior muestra una selección de quince obras; el inferior incluye los casos para los que se dispone de ambos conteos.}
 \label{fig:ganancia-y-complejidad-multicorpus}
 \end{figure}
 
