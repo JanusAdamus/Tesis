@@ -3,7 +3,7 @@
 
 En la cadena de Markov del capítulo anterior, el estado era la nota observada. Así podían describirse transiciones locales, pero dos apariciones de la misma nota recibían necesariamente el mismo tratamiento. Esta identificación resulta restrictiva porque una clase de altura puede cumplir papeles distintos según la región tonal o armónica en la que aparece.
 
-Una cadena de Markov oculta, o HMM por sus siglas en inglés, separa la nota de ese contexto. Las notas forman la secuencia observable y una segunda cadena representa un contexto que cambia a lo largo del tiempo. El contexto actual condiciona las notas que pueden observarse y los contextos que pueden seguirlo. A partir de esta dependencia se pueden evaluar secuencias, reconstruir trayectorias latentes y aprender los parámetros del modelo \cite{rabiner1989,cappe2005}.
+Una cadena de Markov oculta, o HMM por sus siglas en inglés, separa la nota de ese contexto. Las notas forman la secuencia observable y una segunda cadena representa un contexto que cambia a lo largo del tiempo. El contexto actual determina tanto la distribución de las notas observables como la del contexto siguiente. A partir de esta dependencia se pueden evaluar secuencias, reconstruir trayectorias latentes y aprender los parámetros del modelo \cite{rabiner1989,cappe2005}.
 
 \section{Dos procesos y una misma secuencia}
 
@@ -43,7 +43,7 @@ El vector $\boldsymbol{\pi}$ describe el estado inicial. El renglón $i$ de $\ma
 \sum_{v\in\mathcal{V}}b_j(v)=1.
 \]
 
-En la aplicación musical, $Y_t$ es la clase de altura registrada y $X_t$ es un contexto latente. Los HMM se han utilizado para segmentar música y reconocer acordes \cite{sheh2003}, por lo que puede examinarse cada estado como posible región armónica, acorde o función. El ajuste no supervisado no proporciona esa interpretación. Los estados siguen siendo etiquetas estadísticas y su lectura musical requiere estudiar sus emisiones, sus transiciones y, cuando se dispone de ellas, anotaciones externas.
+En la aplicación musical, $Y_t$ es la clase de altura registrada y $X_t$ es un contexto latente. Los HMM se han utilizado para segmentar música y reconocer acordes \cite{sheh2003}, por lo que cabe examinar si cada estado representa una región armónica, un acorde o una función. El ajuste no supervisado no proporciona esa interpretación. Los estados siguen siendo etiquetas estadísticas y su lectura musical requiere estudiar sus emisiones, sus transiciones y, cuando se dispone de ellas, anotaciones externas.
 
 La distribución conjunta de una trayectoria $x_{1:T}$ y una secuencia observada $y_{1:T}$ se factoriza como
 \[
@@ -52,13 +52,13 @@ P(X_{1:T}=x_{1:T},Y_{1:T}=y_{1:T}\mid\lambda)
 \pi_{x_1}b_{x_1}(y_1)
 \prod_{t=2}^{T}a_{x_{t-1}x_t}b_{x_t}(y_t).
 \]
-La expresión sigue el orden en que se genera la secuencia. Primero se elige el estado inicial y su observación; después, cada paso combina una transición latente con una nueva emisión. Gracias a esta factorización, los algoritmos de programación dinámica pueden reunir cálculos que de otro modo se repetirían para cada trayectoria.
+La expresión sigue el orden en que se genera la secuencia. Primero se elige el estado inicial y su observación; después, cada paso combina una transición latente con una nueva emisión. Gracias a esta factorización, los algoritmos de programación dinámica pueden agrupar cálculos que de otro modo se repetirían para cada trayectoria.
 
 Aunque $(X_t)$ sea una cadena de Markov, $(Y_t)$ no tiene por qué satisfacer la misma propiedad. Las notas anteriores informan sobre el estado oculto actual y, por esa vía, cambian la distribución de la nota siguiente. En cambio, el par $(X_t,Y_t)$ sí forma una cadena de Markov en el espacio producto. El Apéndice~\ref{app:hmm-observable} demuestra ambos resultados y estudia el caso límite en el que la observación determina el estado oculto.
 
 \section{Tres problemas computacionales}
 
-Un HMM puede plantear tres problemas distintos \cite{rabiner1989}. Si los parámetros son conocidos, la \emph{evaluación} calcula la probabilidad de una secuencia y la \emph{decodificación} reconstruye una trayectoria latente compatible con ella. Cuando los parámetros también son desconocidos, el \emph{aprendizaje} los estima a partir de las observaciones. En esta tesis, la log-verosimilitud sirve para comparar ajustes, Viterbi produce trayectorias que pueden inspeccionarse y Baum-Welch ajusta el HMM finito de la comparación final.
+El uso de un HMM plantea tres problemas distintos \cite{rabiner1989}. Si los parámetros son conocidos, la \emph{evaluación} calcula la probabilidad de una secuencia y la \emph{decodificación} reconstruye una trayectoria latente compatible con ella. Cuando los parámetros también son desconocidos, el \emph{aprendizaje} los estima a partir de las observaciones. En esta tesis, la log-verosimilitud sirve para comparar ajustes, Viterbi produce trayectorias que pueden inspeccionarse y Baum-Welch ajusta el HMM finito de la comparación final.
 
 \subsection{Evaluación mediante el algoritmo hacia adelante}
 
@@ -149,7 +149,7 @@ Viterbi produce la trayectoria óptima bajo el modelo, pero ésta no es una verd
 
 \subsection{Aprendizaje mediante Baum-Welch}
 
-En una aplicación musical se conocen las notas, pero no la trayectoria que las generó. El aprendizaje debe entonces estimar $\lambda$ a partir de una o varias secuencias observadas. Si los estados también se observaran, los parámetros podrían obtenerse contando inicios, transiciones y emisiones. Baum-Welch sustituye esos conteos desconocidos por sus valores esperados bajo los parámetros actuales y luego los normaliza de nuevo; este procedimiento es una instancia del esquema de esperanza-maximización \cite{rabiner1989}.
+En una aplicación musical se conocen las notas, pero no la trayectoria que las generó. El aprendizaje debe entonces estimar $\lambda$ a partir de una o varias secuencias observadas. Si los estados también se observaran, los parámetros podrían obtenerse contando inicios, transiciones y emisiones. Baum-Welch sustituye esos conteos desconocidos por sus valores esperados bajo los parámetros actuales y luego los normaliza; este procedimiento es una instancia del esquema de esperanza-maximización \cite{rabiner1989}.
 
 En la iteración $r$, el paso de esperanza calcula probabilidades posteriores de estados y transiciones mediante los recorridos hacia adelante y hacia atrás. El paso de maximización elige parámetros que maximizan la esperanza de la log-verosimilitud completa,
 \[
@@ -179,9 +179,9 @@ A_{ij}
 \quad i\neq j,
 \label{eq:transicion-alpha-beta}
 \end{equation}
-con $\alpha=210$, $\beta=1$ y $\pi_i=1/N$. Aquí existe una diferencia entre los materiales conservados: el registro textual indica $N=24$, pero las imágenes sólo muestran diez etiquetas armónicas. Sin la hoja intermedia de conteos no es posible determinar si se restringió el vocabulario completo o si sólo se seleccionaron diez etiquetas para la visualización. Por esta razón, el contraste se limita a las etiquetas que aparecen en las figuras.
+con $\alpha=210$, $\beta=1$ y $\pi_i=1/N$. Los materiales conservados no coinciden por completo: el registro textual indica $N=24$, pero las imágenes muestran diez etiquetas armónicas. Como falta la hoja intermedia de conteos, no se sabe si el vocabulario se restringió o si sólo se eligieron diez etiquetas para la figura. El contraste se limita a esas etiquetas visibles.
 
-Tras aplicar la decodificación de Viterbi, se contaron las transiciones de la trayectoria inferida y se aplicó la misma normalización. Las Figuras~\ref{fig:bach-matriz-inferida} y~\ref{fig:bach-matriz-referencia} muestran las matrices por separado para que las celdas puedan leerse. Ambas reproducen los valores de las imágenes originales, sin sustituir el conteo manual ni añadir precisión a sus dos decimales.
+Tras aplicar la decodificación de Viterbi, se contaron las transiciones de la trayectoria inferida y se aplicó la misma normalización. Las Figuras~\ref{fig:bach-matriz-inferida} y~\ref{fig:bach-matriz-referencia} muestran las matrices por separado para que las celdas puedan leerse. Ambas reproducen los valores de las imágenes originales, sin sustituir el conteo manual ni atribuirles más precisión que la registrada.
 
 \begin{figure}[p]
     \centering
@@ -199,7 +199,7 @@ Tras aplicar la decodificación de Viterbi, se contaron las transiciones de la t
 
 En ambas matrices predominan los valores de la diagonal: una vez asignado un acorde, la siguiente posición suele conservar la misma etiqueta. También coinciden varias transiciones fuera de la diagonal. La diferencia más visible está en \texttt{E min}. La referencia manual le asigna probabilidad $0.92$ de permanencia y $0.08$ de transición a \texttt{F Maj}, pero la trayectoria inferida no visita ese estado. Por eso el renglón correspondiente queda sin conteos, aunque el estado forme parte del vocabulario.
 
-La matriz de diferencias absolutas que se registró durante el ejercicio aparece en la Figura~\ref{fig:bach-error}. Los valores se transcribieron directamente de la imagen histórica. No se calcularon de nuevo a partir de las otras dos figuras, porque sus cifras están redondeadas y no conservan todas las diferencias de la hoja de cálculo original.
+La Figura~\ref{fig:bach-error} conserva la matriz de diferencias absolutas del ejercicio. Sus valores se transcribieron de la imagen histórica y no se calcularon de nuevo: las otras dos figuras están redondeadas y no retienen todas las diferencias de la hoja de cálculo original.
 
 \begin{figure}[H]
     \centering
@@ -208,9 +208,9 @@ La matriz de diferencias absolutas que se registró durante el ejercicio aparece
     \label{fig:bach-error}
 \end{figure}
 
-El conteo manual encontró $30$ cambios de acorde en la referencia y $27$ en la trayectoria inferida. Entre estos últimos, $22$ coincidieron con la referencia. La razón $27/30=0.90$ compara la cantidad de cambios producidos, pero no es una tasa de detección: cinco de los cambios inferidos no coincidieron. La razón $22/27\approx0.815$ expresa la proporción de cambios inferidos que sí coincidió en este ejercicio. No se contó con un segundo anotador ni quedó documentada una regla de tolerancia para coincidencias cercanas.
+El conteo manual encontró $30$ cambios de acorde en la referencia y $27$ en la trayectoria inferida. De estos últimos, $22$ coincidieron. La razón $27/30=0.90$ compara cantidades de cambios, no una tasa de detección, pues cinco cambios inferidos no coincidieron. La razón $22/27\approx0.815$ sí expresa la proporción de coincidencias entre los cambios inferidos. El ejercicio no tuvo un segundo anotador y tampoco conserva una regla de tolerancia para coincidencias cercanas.
 
-Este ejercicio sirve como diagnóstico del ajuste, no como comparación entre modelos. El HMM recupera algunas regularidades de la organización armónica propuesta, pero omite uno de sus estados. Al tratarse de una sola obra con una sola anotación manual, las proporciones no pueden generalizarse ni el desacuerdo puede atribuirse sólo al número de estados. El ejemplo deja, sin embargo, una dificultad concreta: el tamaño del vocabulario latente tuvo que fijarse antes del ajuste.
+El HMM recupera algunas regularidades de la organización armónica propuesta, pero omite uno de sus estados. Una sola obra y una sola anotación no bastan para generalizar las proporciones ni para atribuir el desacuerdo al número de estados. El ejercicio tiene un alcance más modesto: muestra que el vocabulario latente tuvo que fijarse antes del ajuste.
 
 \section{El límite del número fijo de estados}
 
@@ -220,4 +220,4 @@ El HMM finito separa la observación del contexto latente, pero antes de ajustar
 \]
 Si $N$ es pequeño, comportamientos distintos pueden quedar reunidos en un mismo estado. Si es grande, una regularidad puede repartirse entre estados redundantes. La selección por validación permite comparar varios valores, aunque todavía requiere una rejilla finita y un límite decidido por anticipado.
 
-El Capítulo~\ref{chap:ihmm} conserva la misma relación entre estados y observaciones, pero introduce una colección abierta de estados potenciales para que la inferencia ocupe sólo una parte. Esta formulación conduce al proceso de Dirichlet jerárquico y, en el cálculo, a una aproximación truncada.
+El Capítulo~\ref{chap:ihmm} conserva la misma relación entre estados y observaciones, pero considera una colección no fijada de estados potenciales y deja que la inferencia utilice sólo los necesarios. Esta formulación conduce al proceso de Dirichlet jerárquico y, en el cálculo, a una aproximación truncada.

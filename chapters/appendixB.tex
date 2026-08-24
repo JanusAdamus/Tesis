@@ -1,7 +1,7 @@
 \chapter{Propiedades del proceso observable en un HMM}
 \label{app:hmm-observable}
 
-El Capítulo~\ref{chap:hmm} afirma que las observaciones de un HMM no forman, en general, una cadena de Markov, aunque el par compuesto por estado y observación sí lo hace. Las demostraciones se reúnen aquí para conservar el argumento formal sin interrumpir la introducción de los algoritmos.
+En un HMM, la propiedad de Markov pertenece a la dinámica oculta y no se transfiere, en general, a las observaciones. El par formado por el estado y la observación sí conserva esa propiedad. Un contraejemplo permite precisar la diferencia utilizada en el Capítulo~\ref{chap:hmm}.
 
 \section{Las observaciones pueden conservar memoria}
 
@@ -20,7 +20,7 @@ A=
 \qquad
 P(X_1=1)=P(X_1=2)=\tfrac12.
 \]
-El estado inicial permanece fijo durante toda la trayectoria. Condicionado en $X_1=1$, las observaciones son Bernoulli independientes con parámetro $p$; condicionado en $X_1=2$, lo son con parámetro $q$, donde $p,q\in(0,1)$ y $p\neq q$.
+El estado inicial permanece fijo durante toda la trayectoria. Condicionadas a $X_1=1$, las observaciones son Bernoulli independientes con parámetro $p$; condicionadas a $X_1=2$, lo son con parámetro $q$, donde $p,q\in(0,1)$ y $p\neq q$.
 
 Por la ley de la probabilidad total,
 \[
@@ -67,7 +67,7 @@ La expresión depende del presente sólo a través de $Z_t$, por lo que el proce
 
 \section{Un caso límite}
 
-Si la observación revela por completo el estado oculto, la memoria adicional desaparece. La proposición siguiente formaliza ese caso.
+La memoria adicional desaparece si la observación revela por completo el estado oculto.
 
 \begin{proposition}
 Supóngase que existe una función $f:\mathcal{V}\to\mathcal{S}$ tal que
@@ -100,4 +100,4 @@ P(Y_{t+1}=v\mid Y_t=y_t),
 y el proceso observable es markoviano.
 \end{proof}
 
-La condición anterior es excepcional en la interpretación musical de la tesis. Una clase de altura aislada no suele identificar un único contexto armónico. Precisamente por eso el historial de observaciones puede aportar información sobre el estado latente incluso cuando la dinámica oculta es de primer orden \cite{cappe2005}.
+La condición anterior es excepcional en la interpretación musical de la tesis. Una clase de altura aislada no suele identificar un único contexto armónico. Por eso el historial de observaciones puede aportar información sobre el estado latente incluso cuando la dinámica oculta es de primer orden \cite{cappe2005}.

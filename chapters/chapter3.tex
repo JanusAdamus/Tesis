@@ -54,11 +54,11 @@ El ejemplo produce $252$ acordes posibles antes de observar una sola nota. Los e
 
 Los modelos bayesianos no paramétricos formalizan esa separación. El término \emph{no paramétrico} puede resultar engañoso: el modelo sí tiene parámetros, pero no fija el número de componentes utilizados antes de observar los datos. En este caso se parte de una colección numerable de estados potenciales y se distribuye entre ellos la probabilidad mediante un proceso de Dirichlet \cite{ferguson1973,sethuraman1994}. El Apéndice~\ref{app:dirichlet} desarrolla el paso desde una distribución de Dirichlet finita hasta esta construcción.
 
-El HMM del capítulo anterior se mantiene y cambia su espacio de estados. En lugar de usar $\{1,\ldots,N\}$, se considera
+La estructura del HMM del capítulo anterior se conserva, pero cambia el espacio de estados. En lugar de usar $\{1,\ldots,N\}$, se considera
 \[
 \mathcal{S}=\mathbb{N}.
 \]
-La propiedad de Markov no cambia. El siguiente estado depende del estado presente y la observación depende del estado latente actual. La diferencia es que ya no se reserva de antemano un número exacto de contextos.
+La propiedad de Markov no cambia. El siguiente estado depende del estado presente y la observación depende del estado latente actual. La diferencia es que ya no se fija de antemano un número exacto de contextos.
 
 \begin{Definicion}
 Una \emph{cadena de Markov oculta infinita} está determinada por dos procesos estocásticos en tiempo discreto
@@ -96,7 +96,7 @@ con
 \]
 \end{Definicion}
 
-Al ampliar el espacio de estados surge una dificultad concreta. Cada renglón de $\mathbf{A}$ debe asignar probabilidad a la misma colección, de modo que el estado $j$ conserve su significado sin importar el estado de origen. El proceso de Dirichlet jerárquico impone esta referencia compartida mediante una distribución global. En las cadenas ocultas, la construcción resultante se denomina HMM basado en un proceso de Dirichlet jerárquico, o HDP-HMM, y es una realización de la cadena de Markov oculta infinita, abreviada iHMM \cite{beal2002,teh2006}.
+Al ampliar el espacio de estados surge una dificultad concreta. Cada renglón de $\mathbf{A}$ debe asignar probabilidad a la misma colección, de modo que el estado $j$ conserve su significado sin importar el estado de origen. El proceso de Dirichlet jerárquico establece esa referencia común mediante una distribución global. En las cadenas ocultas, la construcción resultante se denomina HMM basado en un proceso de Dirichlet jerárquico, o HDP-HMM, y constituye una forma de cadena de Markov oculta infinita, abreviada iHMM \cite{beal2002,teh2006}.
 
 La distribución global puede imaginarse como una barra de longitud uno que se rompe sucesivamente. El primer fragmento recibe peso $\beta_1$; del resto se obtiene $\beta_2$, y así sucesivamente. En conjunto, los fragmentos forman una distribución de probabilidad sobre los estados potenciales. En lo que sigue, $DP(c,H)$ denota un proceso de Dirichlet con concentración $c$ y medida base $H$; la abreviatura $i.i.d.$ indica variables independientes con la misma distribución. Formalmente, se escribe
 \[
@@ -119,7 +119,7 @@ donde $A_i$ es el renglón $i$-ésimo de $\mathbf{A}$.
 \[
 \mathbb{E}[a_{ij}\mid\beta]=\beta_j.
 \]
-La distribución global $\beta$ funciona como un catálogo compartido. Cada renglón $A_i$ puede favorecer transiciones distintas, pero todos se refieren a los mismos estados y parten de los pesos $\beta_j$. En términos musicales, un contexto ya utilizado puede reaparecer en distintas regiones de la obra; un contexto nuevo conserva una probabilidad pequeña, pero positiva, de incorporarse.
+La distribución global $\beta$ funciona como un catálogo compartido. Cada renglón $A_i$ puede favorecer transiciones distintas, pero todos se refieren a los mismos estados y parten de los pesos $\beta_j$. En términos musicales, un contexto ya utilizado puede reaparecer en distintas regiones de la obra; un contexto nuevo tiene una probabilidad pequeña, pero positiva, de incorporarse.
 
 El alfabeto observable no necesita crecer junto con los estados. Si $\mathcal{V}$ contiene doce clases de altura, cada contexto latente puede conservar una distribución categórica sobre esas mismas doce posibilidades. Lo desconocido es cuántos contextos hacen falta para organizar la secuencia, no cuántos símbolos pueden observarse.
 
@@ -129,7 +129,7 @@ El calificativo ``infinito'' describe la colección disponible, no el número de
 
 \section{Del modelo infinito a un cálculo finito}
 
-Una computadora no puede almacenar una matriz con infinitos renglones y columnas. La implementación introduce entonces un techo $K$ y aproxima la colección numerable mediante los estados $1,\ldots,K$ \cite{ishwaran2001,fox2011,vangael2008}. El objetivo no es afirmar que la obra tiene exactamente $K$ contextos, sino elegir un techo suficientemente alto y permitir que la inferencia deje estados sin usar.
+Una computadora no puede almacenar una matriz con infinitos renglones y columnas. La implementación introduce entonces una cota $K$ y aproxima la colección numerable mediante los estados $1,\ldots,K$ \cite{ishwaran2001,fox2011,vangael2008}. El objetivo no es afirmar que la obra tiene exactamente $K$ contextos, sino elegir una cota suficientemente alta y permitir que la inferencia deje estados sin usar.
 
 \begin{Definicion}
 Fijado un entero $K\geq 2$, un \emph{HDP-HMM truncado} con espacio observable discreto $\mathcal{V}=\{1,\dots,V\}$ queda determinado por las variables aleatorias
@@ -163,19 +163,19 @@ Y_t\mid X_t=i,\phi_i\sim \mathrm{Cat}(\phi_i), \qquad t\geq 1.
 \]
 \end{Definicion}
 
-La notación separa el techo computacional de los estados que la trayectoria ocupa. Dentro de ese techo, $\beta$ reparte el peso global entre los $K$ estados; $\gamma$ influye en cómo se distribuye ese peso; $\alpha_0$ regula la distribución inicial y $\alpha$ permite que cada renglón de transición se aparte del patrón global. El parámetro $\kappa$ puede favorecer la permanencia en el mismo estado, mientras que $\eta$ controla la concentración de las emisiones sobre el alfabeto observable.
+La notación distingue la cota computacional de los estados que la trayectoria ocupa. Dentro de esa cota, $\beta$ reparte el peso global entre los $K$ estados; $\gamma$ influye en cómo se distribuye ese peso; $\alpha_0$ regula la distribución inicial y $\alpha$ permite que cada renglón de transición se aparte del patrón global. El parámetro $\kappa$ puede favorecer la permanencia en el mismo estado, mientras que $\eta$ controla la concentración de las emisiones sobre el alfabeto observable.
 
-Una vez fijado $K$, las transiciones y emisiones vuelven a representarse mediante matrices finitas. Para una secuencia de longitud $T$, el costo dominante es del orden de $O(TK^2)$, pues en cada posición deben considerarse transiciones entre pares de estados. Así, un techo innecesariamente grande no es gratuito. Un techo demasiado pequeño, en cambio, puede convertirse en una restricción activa.
+Una vez fijado $K$, las transiciones y emisiones vuelven a representarse mediante matrices finitas. Para una secuencia de longitud $T$, el costo dominante es del orden de $O(TK^2)$, pues en cada posición deben considerarse transiciones entre pares de estados. Por ello, una cota innecesariamente grande aumenta el costo de cálculo. Una cota demasiado pequeña, en cambio, puede limitar el ajuste.
 
-En los experimentos se denomina \emph{estado efectivo} a un estado que aparece ocupado en la trayectoria inferida. Esta cuenta permite comprobar si el modelo utiliza una parte pequeña del techo disponible, pero no mide por sí misma calidad musical. Dos estados efectivos pueden separar contextos útiles o dividir arbitrariamente una misma región; esa diferencia sólo puede establecerse mediante interpretación o anotaciones externas.
+En los experimentos se denomina \emph{estado efectivo} a un estado que aparece ocupado en la trayectoria inferida. Este conteo permite comprobar si el modelo utiliza una parte pequeña de la cota disponible, pero no mide por sí mismo la calidad musical. Dos estados efectivos pueden separar contextos útiles o dividir arbitrariamente una misma región; esa diferencia sólo puede establecerse mediante interpretación o anotaciones externas.
 
-En esta tesis, las observaciones son clases de altura y el iHMM conserva un papel conceptual. El HDP-HMM truncado es la realización computacional que se ajusta sobre las obras y se compara con el HMM finito. La comparación comienza con una pieza extensa, donde la trayectoria puede examinarse antes de resumir resultados sobre un corpus.
+En esta tesis, las observaciones son clases de altura y el iHMM conserva un papel conceptual. El HDP-HMM truncado es la realización computacional que se ajusta con las obras y se compara con el HMM finito. La comparación comienza con una pieza extensa, cuya trayectoria puede examinarse antes de resumir los resultados del corpus.
 
 \section{De una obra al corpus}
 
-El caso ilustrativo es el tercer movimiento de la Sonata no.\ 14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud permite observar con detalle las diferencias entre trayectorias y entender las salidas que luego se resumen. La lectura sólo es ilustrativa, pues una obra no constituye evidencia general a favor de un modelo.
+El caso ilustrativo es el tercer movimiento de la Sonata no.\ 14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud permite observar con detalle las diferencias entre trayectorias y entender los resultados que después se resumen. Este análisis sólo tiene carácter ilustrativo, pues una obra no constituye evidencia general a favor de un modelo.
 
-Las tablas y figuras de este capítulo son exportaciones versionadas de corridas anteriores del repositorio experimental. La copia actual conserva el código que las generó, pero no los CSV primarios de esas corridas. Por ello, las cifras pueden auditarse contra las exportaciones incluidas en la tesis, aunque una reproducción completa requiere recuperar los artefactos estructurados. El Capítulo~\ref{chap:comparacion-final} dispone de un reporte fijado por commit y documenta por separado la misma limitación para sus CSV y JSON.
+Las tablas y figuras proceden de exportaciones versionadas de corridas anteriores. El repositorio conserva el código que las generó, pero no sus CSV primarios; las cifras pueden cotejarse con las exportaciones incluidas, aunque una reproducción completa exige recuperar esos artefactos.
 
 La Tabla~\ref{tab:single-anchor} compara log-verosimilitud, estados ocupados y segmentos contiguos de la trayectoria. Un segmento es una sucesión de posiciones consecutivas a las que el modelo asigna el mismo estado; un cambio de estado inicia el siguiente. Para una misma secuencia, una log-verosimilitud mayor, es decir, menos negativa, indica que el modelo asigna más probabilidad a las observaciones. La magnitud depende de la longitud de la pieza, de modo que estos valores no deben compararse directamente entre obras de tamaños distintos.
 
@@ -188,7 +188,7 @@ La Tabla~\ref{tab:single-anchor} compara log-verosimilitud, estados ocupados y s
 \label{tab:single-anchor}
 \end{table}
 
-La diferencia tiene dos componentes. El HMM finito ocupa $88$ estados y obtiene log-verosimilitud $-10242.186$; el HDP-HMM ocupa $9$ y obtiene $-7834.175$, una ganancia de $2408.011$ unidades. Sin embargo, el modelo truncado produce $1075$ segmentos, frente a $560$ del HMM, y su longitud media es menor. En esta obra, reducir el vocabulario de estados no equivale a producir menos cambios: el HDP-HMM reutiliza un conjunto pequeño de etiquetas con mayor frecuencia.
+Los dos modelos difieren tanto en el ajuste como en la ocupación de estados. El HMM finito ocupa $88$ estados y obtiene log-verosimilitud $-10242.186$; el HDP-HMM ocupa $9$ y obtiene $-7834.175$, una ganancia de $2408.011$ unidades. Sin embargo, el modelo truncado produce $1075$ segmentos, frente a $560$ del HMM, y su longitud media es menor. En esta obra, reducir el vocabulario de estados no equivale a producir menos cambios: el HDP-HMM reutiliza un conjunto pequeño de etiquetas con mayor frecuencia.
 
 El resultado todavía puede depender de las particularidades de la sonata. Para saber si se repite en un conjunto controlado, la comparación se extiende a seis piezas breves antes de incorporar un repertorio mayor.
 
@@ -205,7 +205,7 @@ La comparación controlada utiliza las seis piezas breves de la Tabla~\ref{tab:c
 \label{tab:corpus-clasico-limitado}
 \end{table}
 
-Los resultados agregados aparecen en la Tabla~\ref{tab:resumen-resultados-clasicos}. En las seis obras, el modelo truncado obtiene una log-verosimilitud mayor que el HMM finito. La ganancia media es de $92.970$ unidades y la mediana de $98.739$. El HDP-HMM ocupa además un promedio de $6.667$ estados, frente a $10.833$ del HMM finito.
+Los resultados agregados aparecen en la Tabla~\ref{tab:resumen-resultados-clasicos}. En las seis obras, el modelo truncado obtiene una log-verosimilitud mayor que el HMM finito. La ganancia media es de $92.970$ unidades y la mediana de $98.739$. El HDP-HMM utiliza, en promedio, $6.667$ estados, frente a $10.833$ del HMM finito.
 
 \begin{table}[H]
 \centering
@@ -215,7 +215,7 @@ Los resultados agregados aparecen en la Tabla~\ref{tab:resumen-resultados-clasic
 \label{tab:resumen-resultados-clasicos}
 \end{table}
 
-El promedio oculta que la magnitud de la ganancia cambia entre piezas. La Tabla~\ref{tab:resultados-por-obra} conserva ese detalle y muestra una diferencia positiva en las seis obras. El conjunto es pequeño y la medida corresponde al ajuste sobre las secuencias analizadas; se trata, por tanto, de un resultado descriptivo de la corrida y no de una prueba general de superioridad predictiva.
+El promedio oculta cuánto cambia la ganancia entre piezas. La Tabla~\ref{tab:resultados-por-obra} presenta ese detalle: la diferencia es positiva en las seis obras, pero su magnitud no es uniforme.
 
 \begin{table}[H]
 \centering
@@ -226,7 +226,7 @@ El promedio oculta que la magnitud de la ganancia cambia entre piezas. La Tabla~
 \label{tab:resultados-por-obra}
 \end{table}
 
-La Figura~\ref{fig:logverosimilitud-clasica} ofrece dos lecturas de esas mismas seis obras. En el primer panel, todos los puntos quedan del lado de mayor log-verosimilitud para el HDP-HMM; el segundo muestra la separación agregada entre ambos modelos.
+La Figura~\ref{fig:logverosimilitud-clasica} muestra los valores que dan lugar al resumen anterior. El panel superior compara cada obra y el inferior presenta la distribución agregada; así puede distinguirse un patrón común de una diferencia debida a una sola pieza.
 
 \begin{figure}[H]
 \centering
@@ -246,7 +246,7 @@ La Figura~\ref{fig:logverosimilitud-clasica} ofrece dos lecturas de esas mismas 
 \label{fig:logverosimilitud-clasica}
 \end{figure}
 
-La Figura~\ref{fig:ganancia-y-complejidad-clasica} permite leer juntos el ajuste y el número de estados ocupados. En estas corridas, la mayor log-verosimilitud del HDP-HMM aparece junto con una ocupación menor del espacio latente. Esa cuenta describe compacidad estadística, pero no permite juzgar la calidad musical de la trayectoria.
+Queda otra pregunta: ¿la mayor log-verosimilitud exige ocupar más estados? La Figura~\ref{fig:ganancia-y-complejidad-clasica} muestra lo contrario en estas corridas. El HDP-HMM logra un mejor ajuste y utiliza menos estados. Esta combinación indica un uso más compacto de los estados, pero todavía no permite juzgar la calidad musical de la trayectoria.
 
 \begin{figure}[H]
 \centering
@@ -266,11 +266,11 @@ La Figura~\ref{fig:ganancia-y-complejidad-clasica} permite leer juntos el ajuste
 \label{fig:ganancia-y-complejidad-clasica}
 \end{figure}
 
-La misma diferencia aparece en las seis piezas, aunque el conjunto sigue siendo pequeño. Además, la log-verosimilitud y el número de estados responden preguntas estadísticas; ninguna de las dos medidas establece que las fronteras latentes correspondan a frases, acordes o secciones. La evaluación se amplía a dos fuentes musicales para comprobar si la diferencia de ajuste también aparece fuera de este repertorio breve.
+El resultado es descriptivo y se limita a seis piezas: ni la log-verosimilitud ni el número de estados establecen que las fronteras latentes correspondan a frases, acordes o secciones. Para saber si la diferencia de ajuste aparece fuera de este repertorio breve, la evaluación se amplía a dos fuentes musicales.
 
 \subsection{Resultados sobre el corpus extendido}
 
-El corpus extendido incorpora obras más largas y otro entorno musical. Reúne repertorio occidental identificado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}; la Tabla~\ref{tab:corpus-extendido} resume su composición. Ambos repertorios conservan su procedencia. Su reunión para esta evaluación no supone que compartan la misma teoría armónica.
+El corpus extendido incorpora obras más largas y una tradición musical distinta. Reúne repertorio occidental identificado como \texttt{MuseTrainer} y material de tradición makam procedente de \texttt{SymbTr}; la Tabla~\ref{tab:corpus-extendido} resume su composición. Ambos repertorios se mantienen identificados por su procedencia. Incluirlos en una misma evaluación no supone que compartan la misma teoría armónica.
 
 \begin{table}[H]
 \centering
@@ -281,7 +281,7 @@ El corpus extendido incorpora obras más largas y otro entorno musical. Reúne r
 \label{tab:corpus-extendido}
 \end{table}
 
-De las $169$ obras catalogadas, $168$ pudieron procesarse y $167$ quedaron comparables entre ambos modelos. Una obra de Mozart no entró al lote final y una pieza de Brahms produjo un error de ejecución. Estos casos quedan fuera del denominador de la Tabla~\ref{tab:resultados-multicorpus}, que resume las $167$ comparaciones válidas. En todas ellas, el HDP-HMM obtiene una log-verosimilitud mayor. La ganancia media es de $452.751$ unidades y la mediana de $377.039$; el HDP-HMM ocupa en promedio $8.222$ estados, frente a $32.162$ del HMM finito.
+De las $169$ obras catalogadas, $168$ pudieron procesarse y $167$ produjeron resultados comparables entre ambos modelos. Una obra de Mozart no quedó incluida en el lote final y una pieza de Brahms produjo un error de ejecución. Estos casos quedan fuera del denominador de la Tabla~\ref{tab:resultados-multicorpus}, que resume las $167$ comparaciones válidas. En todas ellas, el HDP-HMM obtiene una log-verosimilitud mayor. La ganancia media es de $452.751$ unidades y la mediana de $377.039$; el HDP-HMM ocupa en promedio $8.222$ estados, frente a $32.162$ del HMM finito.
 
 \begin{table}[H]
 \centering
@@ -323,14 +323,14 @@ Las $167$ comparaciones aparecen en la Figura~\ref{fig:logverosimilitud-multicor
 \label{fig:logverosimilitud-multicorpus}
 \end{figure}
 
-La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} separa los dos componentes del resultado. El panel superior muestra que la diferencia de log-verosimilitud es positiva en los casos comparables; el inferior, que el HDP-HMM utiliza menos estados efectivos en promedio. Como en el subconjunto clásico, ambas observaciones describen ajuste y ocupación, no calidad de segmentación.
+La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} resume otros dos aspectos del resultado. El panel superior presenta las quince mayores ganancias de log-verosimilitud, no las $167$ comparaciones; el signo del conjunto completo se observa en la Figura~\ref{fig:logverosimilitud-multicorpus} y en la Tabla~\ref{tab:resultados-multicorpus}. El panel inferior compara el número de estados en los casos que cuentan con ambas medidas.
 
 \begin{figure}[H]
 \centering
 \begin{subfigure}[t]{0.88\textwidth}
 \centering
 \includegraphics[width=\linewidth]{figures/chapter3/multicorpus_log_likelihood_gain_by_piece.png}
-\caption{Ganancia de log-verosimilitud por obra.}
+\caption{Quince obras con mayor ganancia de log-verosimilitud.}
 \end{subfigure}
 
 \medskip
@@ -339,10 +339,8 @@ La Figura~\ref{fig:ganancia-y-complejidad-multicorpus} separa los dos componente
 \includegraphics[width=\linewidth]{figures/chapter3/multicorpus_state_counts_scatter.png}
 \caption{Comparación del número de estados utilizados por ambos modelos.}
 \end{subfigure}
-\caption{Ganancia de log-verosimilitud y ocupación latente en el corpus extendido. El número de estados ocupados no constituye una métrica estructural de referencia.}
+\caption{Mayores ganancias de log-verosimilitud y ocupación latente en el corpus extendido. El panel superior muestra una selección de quince obras; el inferior conserva los casos con cuentas disponibles para ambos modelos.}
 \label{fig:ganancia-y-complejidad-multicorpus}
 \end{figure}
 
-En las corridas de este capítulo, el HDP-HMM combina mayor log-verosimilitud con un vocabulario latente ocupado más pequeño. El patrón aparece en el subconjunto clásico y en las $167$ obras comparables del corpus extendido. En \texttt{SymbTr}, sin embargo, no demuestra que los estados recuperen categorías propias de la teoría makam; describe únicamente el ajuste a las clases de altura utilizadas.
-
-Estos resultados describen únicamente las secuencias analizadas: el HDP-HMM truncado ofrece en ellas una representación latente más compacta y un mejor ajuste, pero no ha sido evaluado contra anotaciones estructurales ni sobre una tarea predictiva común fuera de muestra. El capítulo siguiente mantiene la estructura como objetivo musical y compara HMM finito, HDP-HMM, VOMM y transformador en la predicción del siguiente evento. Un mejor ajuste en este capítulo no implica, por sí solo, que el mismo modelo sea el mejor predictor en la comparación final.
+En las corridas de este capítulo, el HDP-HMM alcanza una log-verosimilitud mayor y utiliza menos estados. El patrón aparece en el subconjunto clásico y en las $167$ obras comparables del corpus extendido, pero se refiere únicamente al ajuste de las secuencias de clases de altura. No demuestra que los estados recuperen categorías de la teoría makam ni ha sido contrastado con anotaciones estructurales. El capítulo siguiente plantea una evaluación distinta y compara los modelos en una tarea predictiva común fuera de muestra.

@@ -1,9 +1,9 @@
 \chapter{Diseño computacional del sistema de modelado musical}
 \label{chap:design}
 
-La pregunta matemática de esta tesis sólo puede estudiarse en datos si se traduce en un sistema computacional. Ese sistema debe leer partituras, convertirlas en secuencias comparables, ajustar modelos distintos y dejar constancia de qué se comparó. El diseño descrito en este capítulo enlaza, por tanto, la formulación matemática con los experimentos de los capítulos posteriores.
+La pregunta matemática de esta tesis sólo puede contrastarse con datos si se traduce en un sistema computacional. Ese sistema debe leer partituras, convertirlas en secuencias comparables, ajustar modelos distintos y dejar constancia de las condiciones de la comparación. El diseño descrito en este capítulo enlaza, por tanto, la formulación matemática con los experimentos de los capítulos posteriores.
 
-El objetivo no es elegir un modelo universal para música simbólica. Se busca observar qué obtiene cada familia bajo una representación común, sin confundir dos preguntas. Una se refiere a la estructura: qué contextos latentes pueden describirse dentro de una obra. La otra se refiere a la predicción: qué probabilidad asigna el modelo al siguiente evento musical. Un modelo puede responder bien una de ellas y no la otra.
+El objetivo no es elegir un modelo universal para música simbólica. Se busca observar cómo se comporta cada familia con una representación común, sin confundir dos preguntas. Una se refiere a la estructura: qué contextos latentes pueden describirse dentro de una obra. La otra se refiere a la predicción: qué probabilidad asigna el modelo al siguiente evento musical. Un modelo puede dar una buena respuesta a una de ellas y no a la otra.
 
 \section{Problema de diseño}
 
@@ -11,7 +11,7 @@ Una partitura contiene alturas, duraciones, voces, compases y otras indicaciones
 
 Una representación común no basta si cambian las condiciones de evaluación. Por ejemplo, colocar un arreglo en entrenamiento y una versión casi idéntica de la misma obra en prueba puede sobrestimar la generalización. Las particiones se hacen por obra canónica para mantener juntas sus variantes. También se verifica que todos los modelos puntúen los mismos eventos y que el símbolo de inicio funcione como contexto, no como una nota adicional.
 
-Queda todavía el problema de interpretar las salidas. Los modelos HMM finito y HDP-HMM producen estados latentes, mientras que el VOMM y el transformador se incluyen principalmente por su capacidad predictiva. La log-verosimilitud negativa por evento, o NLL, permite compararlos en predicción, pero no dice si un estado coincide con una frase, un acorde o una sección. Por esa razón, el diseño mantiene separado un eje estructural que exige anotaciones externas antes de atribuir significado musical a los estados inferidos.
+Queda todavía el problema de interpretar los resultados. Los modelos HMM finito y HDP-HMM producen estados latentes, mientras que el VOMM y el transformador se incluyen principalmente por su capacidad predictiva. La log-verosimilitud negativa por evento, o NLL, permite comparar esa capacidad, pero no dice si un estado coincide con una frase, un acorde o una sección. Por esa razón, el análisis estructural se mantiene separado y exige anotaciones externas antes de atribuir significado musical a los estados inferidos.
 
 \section{Requerimientos del sistema}
 
@@ -19,15 +19,15 @@ Para construir la secuencia observable, el sistema lee archivos MusicXML y su va
 
 Una corrida también debe poder reconstruirse. Para ello se conservan su configuración, semillas, exclusiones y asignaciones de obras. Los puntos de reanudación permiten continuar cálculos largos sin repetir modelos ya terminados, y las tablas del manuscrito se obtienen de artefactos versionados o estructurados en lugar de transcribirse a mano.
 
-La exigencia de interpretabilidad requiere un cuidado adicional. Una trayectoria puede ocupar pocos estados sin coincidir con divisiones musicales reconocibles. Por ello se registran como dimensiones distintas la ocupación latente, la calidad predictiva y la correspondencia con anotaciones. En la corrida final sólo estuvieron disponibles las dos primeras, pues no se contó con una referencia anotada para completar la evaluación estructural.
+La exigencia de interpretabilidad requiere un cuidado adicional. Una trayectoria puede ocupar pocos estados sin coincidir con divisiones musicales reconocibles. Por ello, la ocupación latente, la calidad predictiva y la correspondencia con anotaciones se evalúan por separado. En la corrida final sólo estuvieron disponibles las dos primeras, pues no se contó con una referencia anotada para completar la evaluación estructural.
 
 \section{Restricciones observadas}
 
-El corpus disponible supera lo que podía procesarse sin límite dentro del calendario experimental. La comparación final partió de una muestra de $3000$ archivos de PDMX \cite{long2024pdmx}, de los cuales quedaron $2933$ piezas después del preprocesamiento. Con esta escala se pudieron construir curvas de aprendizaje, aunque los resultados no describen la colección completa.
+El corpus disponible era demasiado grande para procesarlo en su totalidad dentro del calendario experimental. La comparación final partió de una muestra de $3000$ archivos de PDMX \cite{long2024pdmx}, de los cuales quedaron $2933$ piezas después del preprocesamiento. Este tamaño permitió construir curvas de aprendizaje, aunque los resultados no describen la colección completa.
 
 Los dispositivos empleados tampoco fueron homogéneos. El transformador se ajustó en una unidad de procesamiento gráfico (GPU), mientras que HMM, HDP-HMM y VOMM se ejecutaron en unidades centrales de procesamiento (CPU). Bajo esta configuración, el transformador necesitó menos tiempo de pared que ambos HMM. Esto muestra que la arquitectura neuronal no fue la opción más lenta en la corrida realizada, pero los dispositivos distintos impiden atribuir la diferencia de tiempo únicamente a los algoritmos.
 
-La otra restricción afecta la pregunta estructural. Aunque el repositorio implementa métricas para fronteras y particiones, no hubo anotaciones musicales de referencia para esta corrida. La comparación final permite entonces ordenar la predicción y describir el costo, pero no establecer qué modelo recupera mejor la organización de una obra.
+La otra restricción afecta la pregunta estructural. Aunque el repositorio implementa métricas para fronteras y particiones, no hubo anotaciones musicales de referencia para esta corrida. La comparación final permite entonces comparar el desempeño predictivo y describir el costo, pero no establecer qué modelo recupera mejor la organización de una obra.
 
 \section{Estándares y límites de uso}
 
@@ -37,24 +37,20 @@ La reproducibilidad se adopta aquí como un criterio metodológico. Conservar so
 
 \section{Modelos considerados}
 
-El HMM finito fija la complejidad del espacio latente. Su formulación permite examinar matrices de transición, emisiones y trayectorias, pero exige elegir de antemano un número de estados. En la comparación predictiva final seleccionó siempre el máximo de $48$ estados de la rejilla. Su aparente meseta sólo describe, por tanto, la configuración $K\leq48$ y no toda la familia de HMM finitos.
+Los modelos considerados incorporan el contexto de dos maneras. El HMM finito y el HDP-HMM truncado introducen estados latentes y producen una trayectoria que puede inspeccionarse. El primero obliga a fijar su número antes del ajuste; el segundo puede utilizar sólo una parte de la cota computacional disponible. Esa flexibilidad puede dar una representación más compacta, aunque no garantiza por sí misma mejor predicción ni una interpretación musical de los estados.
 
-El HDP-HMM truncado conserva ese esquema latente, pero permite ocupar menos estados que el techo computacional. En los experimentos descriptivos del Capítulo~\ref{chap:ihmm} obtuvo mayor log-verosimilitud y utilizó menos estados efectivos que el HMM finito sobre las mismas obras. Sin embargo, su NLL fue peor en la evaluación predictiva fuera de muestra del Capítulo~\ref{chap:comparacion-final}. No hay contradicción entre ambos resultados: el ajuste sobre una obra, la compacidad latente y la predicción de obras reservadas miden aspectos distintos.
-
-El VOMM calcula conteos sobre contextos observables de longitud variable. Sirve así como un control entre la memoria de primer orden y la atención, pues permite medir el efecto de ampliar el contexto sin introducir estados ocultos ni una red neuronal \cite{begleiter2004}. En la corrida final tuvo el menor tiempo de ajuste, aunque no obtuvo la mejor NLL.
-
-El transformador causal asigna probabilidades al siguiente evento mediante mecanismos de atención sobre el contexto anterior \cite{vaswani2017}. Esta arquitectura también se ha utilizado para secuencias musicales simbólicas \cite{huang2018musictransformer}. A diferencia de los HMM, no entrega una trayectoria discreta directamente comparable con sus estados. En la corrida final alcanzó la menor \emph{perplexity} a partir de la fracción $0.25$ y continuó mejorando al aumentar el corpus. El resultado favorece al transformador en la tarea predictiva estudiada, pero no demuestra que sus representaciones internas describan mejor la estructura musical.
+El VOMM y el transformador amplían, en cambio, el contexto observable. El VOMM utiliza conteos de longitud variable y permite medir el efecto de recordar más eventos sin introducir estados ocultos \cite{begleiter2004}. El transformador causal aprende a distribuir la atención sobre el contexto anterior \cite{vaswani2017}, una estrategia que también se ha aplicado a secuencias musicales simbólicas \cite{huang2018musictransformer}. Ambos asignan probabilidades al siguiente evento, pero no producen una trayectoria discreta directamente comparable con la de los HMM.
 
 \section{Arquitectura implementada}
 
-La implementación separa la preparación de datos, el modelado y la evaluación. Primero se leen las partituras, se extraen las clases de altura y se registran las exclusiones. Después, las variantes se agrupan por obra canónica para construir las divisiones de entrenamiento, validación y prueba. Los cuatro modelos se ajustan sobre esa base compartida, y el componente de evaluación reúne las métricas, los tiempos, la auditoría de cobertura, las comparaciones por obra y los puntos de reanudación.
+La implementación separa la preparación de datos, el modelado y la evaluación. Primero se leen las partituras, se extraen las clases de altura y se registran las exclusiones. Después, las variantes se agrupan por obra canónica para construir las divisiones de entrenamiento, validación y prueba. Los cuatro modelos se ajustan con esa misma base de datos. El componente de evaluación reúne las métricas, los tiempos, la auditoría de cobertura y las comparaciones por obra; los puntos de reanudación se conservan junto con cada corrida.
 
 Esta separación tuvo una función concreta durante la corrida larga. La caché evitó procesar otra vez los $3000$ archivos, y los puntos de reanudación permitieron continuar después de una interrupción preventiva por temperatura. La auditoría de cobertura comprobó que las diferencias de NLL no surgieran de puntuar eventos distintos entre modelos.
 
 \section{Estrategia y resultado de la comparación}
 
-La tarea común consiste en predecir el siguiente evento. Todos los modelos reciben clases de altura, las mismas particiones por obra y los mismos reinicios de contexto. La métrica principal es la NLL por evento, cuya transformación exponencial es la \emph{perplexity}. Los tiempos y las medidas de complejidad se presentan aparte porque no comparten una unidad que permita reunirlos en una sola cantidad interpretable.
+La tarea común consiste en predecir el siguiente evento. Todos los modelos se alimentan con secuencias de clases de altura y utilizan las mismas particiones por obra y los mismos reinicios de contexto. La métrica principal es la NLL por evento, cuya transformación exponencial es la \emph{perplexity}. Los tiempos y las medidas de complejidad se presentan aparte porque no comparten una unidad que permita reunirlos en una sola cantidad interpretable.
 
-Los resultados dependen del uso que se considere. El transformador fue el mejor predictor en las fracciones medias y grandes del corpus, y el HMM finito obtuvo mejor predicción que el HDP-HMM. Este último mantuvo la representación más compacta en los experimentos descriptivos del Capítulo~\ref{chap:ihmm}, mientras que el VOMM requirió el menor tiempo de ajuste. Como no hubo una referencia anotada, estos resultados no responden cuál de los modelos latentes representa mejor la estructura musical.
+La lectura de los resultados depende de la finalidad del modelo. El transformador fue el mejor predictor en las fracciones medias y grandes del corpus, y el HMM finito obtuvo mejor predicción que el HDP-HMM. Este último mantuvo la representación más compacta en los experimentos descriptivos del Capítulo~\ref{chap:ihmm}, mientras que el VOMM requirió el menor tiempo de ajuste. Como no hubo una referencia anotada, estos resultados no permiten determinar cuál de los modelos latentes representa mejor la estructura musical.
 
-Para anticipar la siguiente clase de altura en la escala estudiada, el transformador resulta preferible. Cuando interesa examinar una trayectoria explícita de estados, HMM finito y HDP-HMM producen un objeto que el transformador no ofrece directamente, aunque su significado musical continúa sin validarse. La comparación conserva esta diferencia entre predicción e interpretación en vez de forzar un único orden de modelos.
+Para entender cómo se llega a esta comparación todavía hace falta construir la secuencia común y precisar qué dependencia se supone entre sus eventos. El Capítulo~\ref{chap:introduction} comienza con esa decisión de representación y presenta la cadena de Markov que sirve de punto de partida.

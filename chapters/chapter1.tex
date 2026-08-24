@@ -7,7 +7,7 @@ Antes de asignar probabilidades hay que decidir qué cuenta como un evento. Una 
 
 \section{De la melodía a una secuencia}
 
-En esta tesis, la melodía se estudia a partir de partituras simbólicas. Cada nota seleccionada por el preprocesamiento cuenta como un evento y el índice $n$ indica su lugar en la secuencia. Avanzar de $n$ a $n+1$ no supone que entre ambos eventos transcurra siempre la misma duración física. Esta es también la representación utilizada en la comparación experimental del Capítulo~\ref{chap:comparacion-final}, cuya tarea común consiste en predecir la siguiente clase de altura. Como no se incorporan la duración, el registro, la dinámica ni parte de la organización métrica, las conclusiones tampoco abarcan esos aspectos.
+En esta tesis, la melodía se estudia a partir de partituras simbólicas. Cada nota seleccionada por el preprocesamiento cuenta como un evento y el índice $n$ indica su lugar en la secuencia. Avanzar de $n$ a $n+1$ no supone que entre ambos eventos transcurra siempre la misma duración física. La comparación experimental del Capítulo~\ref{chap:comparacion-final} utiliza la misma representación para predecir la siguiente clase de altura. Como no se incorporan la duración, el registro, la dinámica ni parte de la organización métrica, las conclusiones tampoco abarcan esos aspectos.
 
 La altura puede conservarse con distinto grado de detalle. Una nota con registro, como $C_4$, distingue la octava; una clase de altura agrupa notas equivalentes módulo octava y las representa con un mismo símbolo, como $C$. Para la comparación común se utilizan las doce clases de altura del sistema cromático occidental. La Figura~\ref{fig:teclado-octava} muestra ese alfabeto dentro de una octava del teclado.
 
@@ -50,7 +50,7 @@ donde $X_n$ es la clase de altura observada en la posición $n$. Tratar $X_n$ co
 
 \section{Dependencia local y cadenas de Markov}
 
-El modelo más simple asignaría a cada posición la misma distribución, con independencia de las notas anteriores. Esa hipótesis pierde la continuidad local que motivó la representación. En el extremo opuesto, condicionar cada nota en todo el historial produce un número de contextos que crece rápidamente y resulta difícil de estimar con datos limitados. La cadena de Markov de primer orden adopta una posición intermedia: conserva la nota presente y descarta el resto del pasado al calcular la siguiente transición.
+El modelo más simple asignaría a cada posición la misma distribución, con independencia de las notas anteriores. Esa hipótesis pierde la continuidad local que motivó la representación. En el extremo opuesto, condicionar cada nota a toda la historia previa produce un número de contextos que crece rápidamente y resulta difícil de estimar con datos limitados. La cadena de Markov de primer orden adopta una posición intermedia: conserva la nota presente y descarta el resto del pasado al calcular la siguiente transición.
 
 \begin{Definicion}
 Sea $(\Omega,\mathcal{F},\mathbb{P})$ un espacio de probabilidad. Una sucesión de variables aleatorias $(X_n)_{n\geq 1}$ con valores en un conjunto finito $S$ es una \emph{cadena de Markov} si, para todo $n\geq 1$ y para cualesquiera $i_1,\ldots,i_n,j\in S$ con probabilidad condicionante positiva,
@@ -85,7 +85,7 @@ En una cadena finita, irreducible y aperiódica, existe una única distribución
 \[
 \lim_{n\to\infty}P(X_n=j\mid X_1=i)=\pi_j.
 \]
-Bajo esas condiciones, $\pi_j$ describe el peso de largo plazo del símbolo $j$ dentro del modelo. Esta interpretación pertenece a la cadena estimada; no basta por sí sola para identificar tonalidad, función armónica o estilo.
+Bajo esas condiciones, $\pi_j$ describe la probabilidad a largo plazo del símbolo $j$ dentro del modelo. Esta interpretación pertenece a la cadena estimada; no basta por sí sola para identificar tonalidad, función armónica o estilo.
 
 \section{De la nota observable al contexto latente}
 
