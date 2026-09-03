@@ -13,6 +13,54 @@ La solución propuesta no es un modelo aislado, sino el sistema de preparación,
 
 El alcance tampoco es elegir un modelo universal para música simbólica. La evidencia se limita a secuencias de clases de altura extraídas de una muestra de PDMX y a las configuraciones y recursos disponibles durante las corridas. La predicción del siguiente evento sí se evalúa; la correspondencia entre estados y estructura musical queda fuera de la validación final porque no se dispuso de anotaciones de referencia ni de salidas estructurales comparables para los cuatro modelos. Esta distinción determina qué afirmaciones puede sostener la tesis y cuáles se conservan como propuestas de trabajo posterior.
 
+\section{Proceso de diseño de la solución}
+\label{sec:design-process}
+
+Comparar cuatro familias de modelos no consiste únicamente en ejecutarlas sobre un conjunto de partituras. Antes de hacerlo es necesario decidir qué observarán, qué tarea resolverán y bajo qué condiciones sus resultados serán comparables. De otro modo, una diferencia de desempeño podría deberse al modelo, pero también a una representación distinta, a una partición más favorable o a que no se puntuaron los mismos eventos. El primer resultado del diseño es, por ello, el terreno común sobre el que se realiza la comparación.
+
+El proceso comenzó con la delimitación del problema y continuó con requisitos que pudieran comprobarse: compartir la representación y las particiones por obra, reservar la prueba para la evaluación final, conservar denominadores comunes y registrar la procedencia y el costo de cada corrida. A partir de estos requisitos se consideraron cuatro alternativas. El HMM finito proporciona una referencia latente de capacidad controlada; el HDP-HMM permite que la ocupación de estados se adapte dentro de una cota computacional; el VOMM representa una referencia basada en conteos y contexto variable; y el transformador ofrece una alternativa de mayor capacidad contextual. La decisión de ingeniería no fue declarar ganadora una familia de antemano, sino construir un sistema que permitiera contrastarlas con criterios compartidos y conservar por separado aquello que no admite una comparación directa.
+
+Los criterios de decisión se tradujeron después en una especificación: clases de altura como observaciones, divisiones por obra canónica, selección de configuraciones mediante validación, predicción del siguiente evento como tarea común y NLL por evento como métrica principal. Esta especificación quedó versionada antes de la corrida principal, como se documenta más adelante en este capítulo. Sobre ella se implementaron los componentes de preparación, ajuste, reanudación, evaluación y auditoría. Los capítulos~\ref{chap:introduction}--\ref{chap:ihmm} desarrollan las decisiones de representación y modelado; el Capítulo~\ref{chap:comparacion-final} documenta su integración en el protocolo común.
+
+Conviene distinguir aquí dos comprobaciones. La \emph{verificación} examina si la implementación respeta lo especificado: por ejemplo, si las variantes de una obra permanecen en la misma partición, si el conjunto de prueba no interviene en la selección y si los cuatro modelos puntúan los mismos eventos. La \emph{validación}, en cambio, pregunta si el sistema produce evidencia pertinente para responder el problema de la tesis. Esta segunda comprobación se apoya en la comparación experimental, en el análisis pareado y en las sensibilidades; no convierte una mejora predictiva en evidencia de estructura musical.
+
+La Figura~\ref{fig:chapter0-design-process} muestra el proceso completo. Se representa como un recorrido con retorno porque el desarrollo no fue lineal. Las auditorías y los resultados hicieron necesario revisar decisiones concretas, entre ellas el solapamiento de ventanas, la capacidad permitida al HMM finito, las particiones por obra y el presupuesto de inferencia. Estas revisiones se presentan como análisis posteriores y no como condiciones fijadas antes de observar la corrida principal.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    scale=0.80,
+    transform shape,
+    >=latex,
+    designbox/.style={draw, rounded corners, align=center, minimum width=2.55cm, minimum height=1.02cm, fill=black!4, font=\small},
+    flow/.style={->, thick},
+    feedback/.style={->, thick, dashed}
+]
+\node[designbox] (problem) at (-5.25,1.45) {Problema\\y alcance};
+\node[designbox] (requirements) at (-1.75,1.45) {Requisitos y\\restricciones};
+\node[designbox] (alternatives) at (1.75,1.45) {Alternativas\\y criterios};
+\node[designbox] (specification) at (5.25,1.45) {Especificación\\del protocolo};
+
+\node[designbox] (implementation) at (5.25,-1.45) {Implementación\\del sistema};
+\node[designbox] (verification) at (1.75,-1.45) {Verificación\\de requisitos};
+\node[designbox] (validation) at (-1.75,-1.45) {Validación\\experimental};
+\node[designbox] (revision) at (-5.25,-1.45) {Revisión de\\decisiones};
+
+\draw[flow] (problem) -- (requirements);
+\draw[flow] (requirements) -- (alternatives);
+\draw[flow] (alternatives) -- (specification);
+\draw[flow] (specification) -- (implementation);
+\draw[flow] (implementation) -- (verification);
+\draw[flow] (verification) -- (validation);
+\draw[flow] (validation) -- (revision);
+\draw[feedback] (revision.west) -- ++(-0.45,0) |- (requirements.north);
+\end{tikzpicture}
+\caption{Proceso iterativo de diseño de la solución. La verificación contrasta requisitos e implementación; la validación examina si el sistema permite responder la pregunta de investigación. El retorno representa revisiones posteriores, no una modificación silenciosa de la corrida principal.}
+\label{fig:chapter0-design-process}
+\end{figure}
+
+La tabla de trazabilidad que se presenta más adelante en este capítulo es una salida de este proceso: relaciona cada requisito con una decisión y con la evidencia disponible para comprobarla. Su función no es sustituir el proceso de diseño, sino mostrar hasta dónde pudo verificarse el diseño consolidado. Por esta razón conserva como parciales los requisitos cuya evidencia todavía no está completa.
+
 \section{De la partitura a una comparación común}
 
 Una partitura contiene alturas, duraciones, voces, compases y otras indicaciones, mientras que los modelos estudiados necesitan una secuencia discreta. Antes de comparar modelos se debe decidir qué parte de esa información permanece en la secuencia. En la tarea común se utilizan clases de altura, de modo que una cadena de Markov oculta finita (HMM), su extensión mediante un proceso de Dirichlet jerárquico (HDP-HMM), un modelo de Markov de orden variable (VOMM) y un transformador causal compartan el mismo alfabeto. La comparación se vuelve posible a costa de excluir registro, duración y parte de la organización métrica.

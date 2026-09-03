@@ -1,5 +1,9 @@
 # Plan para explicitar el proceso de diseño computacional
 
+## Estado al 3 de septiembre de 2026
+
+La sección `Proceso de diseño de la solución` y su diagrama iterativo fueron incorporados al Capítulo 0. La sección distingue verificación de validación, presenta la tabla R1--R7 como una salida de trazabilidad y describe las sensibilidades como revisiones posteriores. El manuscrito se compiló con Tectonic 0.17.0 y se revisaron visualmente las páginas modificadas: el diagrama conserva su legibilidad en la página y no presenta recortes ni superposiciones. La comprobación del registro de compilación tampoco encontró referencias o citas indefinidas. Con estas verificaciones queda cerrado el cambio expositivo previsto en este plan; la evidencia experimental todavía pendiente se mantiene identificada como trabajo de ejecución y no se da por satisfecha mediante redacción.
+
 ## Propósito
 
 Enmarcar la tesis como el diseño, implementación, verificación y validación de una solución computacional, sin alterar retrospectivamente la historia del proyecto ni presentar la tabla de trazabilidad como si fuera, por sí sola, el proceso de diseño.
