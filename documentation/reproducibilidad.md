@@ -81,3 +81,26 @@ El conteo narrativo asociado registra 30 cambios en la referencia manual, 27 en 
 - La obra y el evento responden preguntas diferentes. El manuscrito declara la obra como unidad de inferencia principal.
 - No hubo anotaciones estructurales. La menor NLL no demuestra que un modelo haya recuperado frases, secciones o funciones armónicas.
 - Las pruebas unitarias y de regresión respaldan contratos de software; no se presentan como evidencia musical ni sustituyen las corridas.
+
+## Medición de recursos con configuraciones fijadas
+
+El 4 de septiembre de 2026 se recibieron en `D:\` los artefactos del benchmark de recursos. La auditoría terminó con estado `passed`: contiene doce filas, tres repeticiones técnicas para cada uno de los cuatro modelos, y reproduce el identificador canónico del corpus `D7F50062EB57628F248CC468141CFA956A3DCB3ECE396C79CF3FB013D3F8561F`. Los recuentos son los mismos de la corrida principal: 3000 entradas, 2933 piezas preparadas, 67 exclusiones y 693754 eventos.
+
+La configuración conserva la fracción completa, la partición con semilla 7 y la semilla de datos 1. Se fijaron 48 estados para el HMM finito, $\alpha=8$, $\alpha_0=8$ y $\gamma=2$ para el HDP-HMM, orden 4 para el VOMM y la arquitectura causal ya seleccionada para el transformador. Las repeticiones usan la misma semilla de modelo y, por ello, miden estabilidad técnica de tiempo y memoria; no aumentan el número de réplicas estadísticas del desempeño.
+
+El entorno registrado fue Windows 11, Python 3.12.10, `music21` 9.9.1, NumPy 2.4.4 y PyTorch 2.11.0 con CUDA 12.8. La estación tenía un procesador AMD de seis núcleos físicos y doce lógicos, 34247626752 bytes de RAM y una GPU NVIDIA GeForce RTX 4060. El transformador utilizó precisión de 32 bits.
+
+La tabla `chapters/tables/chapter4_resource_benchmark.tex` se genera mediante `scripts/generate_resource_benchmark_table.py`. El generador exige auditoría aprobada, comprueba los hashes declarados y lee tanto `resource_benchmark_summary.csv` como `cost_scenarios.json`; no transcribe cifras desde el manuscrito. Los hashes SHA-256 de los cuatro archivos cubiertos por la auditoría son:
+
+| Archivo | SHA-256 |
+|---|---|
+| `resource_benchmark_raw.csv` | `75030E61A06AD098A421315AA984E66CDF1ADB52270E3E232C7CE1AFD698C5C1` |
+| `resource_benchmark_summary.csv` | `29F5DB9F96066DAF7460B0294AC40460E6DF38D676CF4E3A471B41087D0F4F7D` |
+| `resource_benchmark_environment.json` | `F1FA1BB9978323CA52382E7F73A6EAA2EF94186BDA8AE5D5730383F1C223AE8F` |
+| `resource_benchmark_config.json` | `7B9322656EA14EDC746DB9DEBA81A6B9394E6CEBA2AC84C09304BD2872E2BF78` |
+
+Los escenarios monetarios emplean tarifas registradas el 3 de septiembre de 2026 para `us-central1`: USD 0.071696 por hora de una instancia `n2-highcpu-2` y USD 0.421696 por hora de esa instancia con una GPU NVIDIA T4. Son entradas de un escenario, no gastos observados en la estación de trabajo.
+
+La memoria de CUDA sí se reinició y se midió para el bloque del transformador. La RAM requiere otra interpretación. El monitor registró el máximo absoluto del proceso y sus hijos, y los modelos se ejecutaron en secuencia dentro del mismo proceso. El crecimiento y la retención de memoria de las bibliotecas hacen que el máximo de una etapa posterior incluya asignaciones anteriores. Por esta razón, el manuscrito no compara la RAM propia de los cuatro modelos: sólo reconoce esos máximos como envolvente del proceso completo. Esta salvedad no afecta los tiempos ni los escenarios calculados a partir de ellos.
+
+El benchmark y los escenarios permiten cerrar R5 con esa salvedad explícita. R4 permanece parcial mientras el paquete público de la comparación predictiva y la prueba de regeneración desde una clonación limpia sigan ausentes.

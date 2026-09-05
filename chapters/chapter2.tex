@@ -43,7 +43,7 @@ El vector $\boldsymbol{\pi}$ describe el estado inicial. El renglón $i$ de $\ma
 \sum_{v\in\mathcal{V}}b_j(v)=1.
 \]
 
-La Figura~\ref{fig:hmm-esquema} permite leer esta definición sin comenzar por las matrices. La cadena superior describe la sucesión de contextos ocultos; cada uno de ellos genera la nota situada debajo. Así, las notas se observan de manera directa, mientras que la trayectoria que las relaciona debe inferirse.
+La Figura~\ref{fig:hmm-esquema} traduce la definición a un esquema. La cadena superior describe la sucesión de contextos ocultos; cada uno de ellos genera la nota situada debajo. Las notas se observan de manera directa, mientras que la trayectoria que las relaciona debe inferirse.
 
 \begin{figure}[H]
 \centering
@@ -92,7 +92,7 @@ Aunque $(X_t)$ sea una cadena de Markov, $(Y_t)$ no tiene por qué satisfacer la
 
 \section{Tres problemas computacionales}
 
-El uso de un HMM plantea tres problemas distintos \cite{rabiner1989}. Si los parámetros son conocidos, la \emph{evaluación} calcula la probabilidad de una secuencia y la \emph{decodificación} reconstruye una trayectoria latente compatible con ella. Cuando los parámetros también son desconocidos, el \emph{aprendizaje} los estima a partir de las observaciones. En esta tesis, la log-verosimilitud sirve para comparar ajustes, Viterbi produce trayectorias que pueden inspeccionarse y Baum-Welch ajusta el HMM finito de la comparación final.
+El uso de un HMM plantea tres problemas distintos \cite{rabiner1989}. Si los parámetros son conocidos, la \emph{evaluación} calcula la probabilidad de una secuencia y la \emph{decodificación} reconstruye una trayectoria latente compatible con ella. Cuando los parámetros también son desconocidos, el \emph{aprendizaje} los estima a partir de las observaciones. En los experimentos, la log-verosimilitud compara ajustes, Viterbi produce trayectorias inspeccionables y Baum-Welch ajusta el HMM finito de la comparación final.
 
 \subsection{Evaluación mediante el algoritmo hacia adelante}
 
@@ -199,7 +199,7 @@ Baum-Welch estima probabilidades para un número $N$ de estados fijado de antema
 
 \section{Una comprobación manual sobre el Preludio en Do mayor}
 
-El \emph{Preludio en Do mayor}, BWV~846, de J.\,S. Bach, permitió contrastar una trayectoria inferida con una lectura directa de la partitura. Primero se identificó manualmente una sucesión armónica. Después se contaron sus transiciones entre acordes y se normalizó cada renglón para obtener una matriz de probabilidades. El resultado es una referencia para este ejercicio, no una única lectura posible de la obra, pues depende de cómo se asignaron los acordes.
+Sobre el \emph{Preludio en Do mayor}, BWV~846, de J.\,S. Bach, se contrastó una trayectoria inferida con una lectura directa de la partitura. Primero se identificó manualmente una sucesión armónica. Después se contaron sus transiciones entre acordes y se normalizó cada renglón para obtener una matriz de probabilidades. Esta referencia depende de cómo se asignaron los acordes y no constituye una lectura única de la obra.
 
 El HMM utilizó una distribución inicial uniforme y una matriz de transición a priori que favorece la permanencia. Para $N$ estados se fijó
 \begin{equation}
@@ -244,7 +244,7 @@ La Figura~\ref{fig:bach-error} reproduce la matriz de diferencias absolutas del 
 
 El conteo manual encontró $30$ cambios de acorde en la referencia y $27$ en la trayectoria inferida. De estos últimos, $22$ coincidieron. La razón $27/30=0.90$ compara cantidades de cambios, no una tasa de detección, pues cinco cambios inferidos no coincidieron. La razón $22/27\approx0.815$ sí expresa la proporción de coincidencias entre los cambios inferidos. En el ejercicio no participó un segundo anotador y tampoco se conserva una regla de tolerancia para coincidencias cercanas.
 
-El HMM recupera algunas regularidades de la organización armónica propuesta, pero omite uno de sus estados. Una sola obra y una sola anotación no bastan para generalizar las proporciones ni para atribuir el desacuerdo al número de estados. El ejercicio tiene un alcance más modesto: muestra que el vocabulario latente tuvo que fijarse antes del ajuste.
+El HMM recupera algunas regularidades de la organización armónica propuesta y omite uno de sus estados. Al provenir de una sola obra y una sola anotación, las proporciones no pueden generalizarse ni el desacuerdo atribuirse al número de estados. El ejercicio muestra, en cambio, que el vocabulario latente tuvo que fijarse antes del ajuste.
 
 \section{El límite del número fijo de estados}
 
@@ -252,6 +252,6 @@ El HMM finito separa la observación del contexto latente, pero antes de ajustar
 \[
 \mathcal{S}=\{1,\ldots,N\}.
 \]
-Si $N$ es pequeño, comportamientos distintos pueden quedar reunidos en un mismo estado. Si es grande, una regularidad puede repartirse entre estados redundantes. La selección por validación permite comparar varios valores, aunque todavía requiere una rejilla finita y un límite decidido por anticipado.
+Si $N$ es pequeño, comportamientos distintos pueden quedar reunidos en un mismo estado. Si es grande, una regularidad puede repartirse entre estados redundantes. La selección por validación compara varios valores dentro de una rejilla finita cuyo límite se decide por anticipado.
 
-El Capítulo~\ref{chap:ihmm} conserva la misma relación entre estados y observaciones, pero permite que el número de estados potenciales no se fije de antemano y que la inferencia utilice sólo los necesarios. Esta formulación conduce al proceso de Dirichlet jerárquico y, en el cálculo, a una aproximación truncada.
+El modelo del Capítulo~\ref{chap:ihmm} conserva la relación entre estados y observaciones y sustituye el vocabulario fijo por una colección abierta de estados potenciales. La inferencia ocupa una parte de esa colección. Esta formulación conduce al proceso de Dirichlet jerárquico y, en el cálculo, a una aproximación truncada.

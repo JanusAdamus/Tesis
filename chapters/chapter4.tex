@@ -1,13 +1,11 @@
-\chapter{Comparación predictiva entre HMM, HDP-HMM, VOMM y transformador}
+\chapter[Resultados y evaluación de la solución]{Resultados de la comparación predictiva y evaluación de viabilidad}
 \label{chap:comparacion-final}
 
-El HMM finito y el HDP-HMM se apoyan en una misma representación de la melodía: detrás de las notas observadas hay una trayectoria de estados que cambia en el tiempo. El capítulo anterior utilizó esa representación para estudiar qué estados aparecen, cómo se conectan y con qué frecuencia se reutilizan. Fijar o aprender el número de estados modifica la descripción, pero ambos modelos parten de la misma idea.
+La predicción del siguiente evento constituye la base común de los cuatro modelos. Dada una sucesión de clases de altura, se mide la probabilidad que cada uno asigna a la nota que aparece después. La evaluación estructural permanece separada.
 
-Un transformador causal parte de otra representación. No postula una trayectoria discreta de estados ocultos, sino que utiliza el contexto anterior para asignar probabilidades al siguiente evento mediante atención \cite{vaswani2017}. Este principio también se ha aplicado a secuencias musicales simbólicas \cite{huang2018musictransformer}. Por eso, equiparar sus componentes internos resulta poco informativo: una cabeza de atención no desempeña el mismo papel que un estado de un HMM. La comparación necesita una pregunta que los distintos modelos puedan responder en los mismos términos: dada una sucesión de clases de altura, ¿qué probabilidad asigna cada uno a la nota que aparece después?
+El HMM finito y el HDP-HMM representan el contexto mediante una trayectoria de estados. El transformador causal utiliza atención sobre los eventos anteriores \cite{vaswani2017,huang2018musictransformer}; una cabeza de atención no equivale a un estado latente. La tarea predictiva evita esa equivalencia artificial. Una trayectoria inspeccionable tampoco constituye por sí misma una interpretación musical validada.
 
-Esa pregunta permite establecer una base común, aunque sólo cubre una parte del problema musical. Un modelo puede anticipar bien la siguiente nota sin recuperar frases, secciones o funciones armónicas. Una trayectoria latente, por su parte, puede ser fácil de inspeccionar sin alcanzar la mejor predicción fuera de muestra. Esa posibilidad de inspección no basta para atribuir significado musical a sus estados. El capítulo mantiene separados ambos objetivos: la descripción estructural sigue siendo el objetivo musical, pero aún no cuenta con una evaluación externa, mientras que la predicción del siguiente evento proporciona la tarea común. También se registra el costo computacional, pues condiciona qué resultados pueden reproducirse en la práctica.
-
-Se incorpora también un modelo de Markov de orden variable, o VOMM por sus siglas en inglés \cite{begleiter2004}. A diferencia del HMM de primer orden, el VOMM puede consultar varios eventos observados del pasado; a diferencia del transformador, lo hace mediante tablas explícitas de conteos. Sirve así como punto de comparación para estimar cuánta mejora predictiva puede obtenerse con memoria local antes de recurrir a una arquitectura neuronal.
+El modelo de Markov de orden variable, o VOMM, consulta varios eventos observados del pasado mediante tablas explícitas de conteos \cite{begleiter2004}. Ofrece así una referencia de memoria local frente a la arquitectura neuronal.
 
 La diferencia puede verse en la Figura~\ref{fig:chapter4-vomm-transformer}. El VOMM mantiene conteos para contextos observados de distintas longitudes y da más peso a los contextos largos cuando cuentan con evidencia suficiente. Si un contexto largo aparece pocas veces, la estimación se apoya más en contextos breves. El transformador, en cambio, representa cada evento y combina mediante atención causal la información de las posiciones anteriores antes de producir la distribución de la siguiente nota.
 
@@ -70,7 +68,7 @@ La diferencia puede verse en la Figura~\ref{fig:chapter4-vomm-transformer}. El V
   \label{fig:chapter4-vomm-transformer}
 \end{figure}
 
-Los dos modelos amplían así la memoria observable, pero conservan la información de manera distinta: el VOMM utiliza tablas que pueden inspeccionarse por contexto, mientras que el transformador aprende representaciones distribuidas. El dibujo resume el flujo de información; no identifica los componentes internos de ninguno de los modelos con estados musicales.
+Ambos amplían la memoria observable de manera distinta: el VOMM conserva tablas inspeccionables por contexto y el transformador aprende representaciones distribuidas. El dibujo resume el flujo de información sin identificar sus componentes internos con estados musicales.
 
 La Figura~\ref{fig:chapter4-evaluation-focus} muestra la relación entre las dos preguntas. Los cuatro modelos reciben la misma representación y predicen el siguiente evento. El HMM finito y el HDP-HMM producen, además, trayectorias latentes que podrían utilizarse en un análisis estructural. A partir de ellas puede proponerse una segmentación, pero no constituyen segmentaciones de referencia.
 
@@ -119,65 +117,6 @@ La Figura~\ref{fig:chapter4-evaluation-focus} muestra la relación entre las dos
 \label{fig:chapter4-evaluation-focus}
 \end{figure}
 
-\section{Una tarea común para modelos diferentes}
-
-Considérese un segmento de prueba $y_1,\ldots,y_T$. En cada posición $t$, el modelo observa el contexto permitido $c_t$ y asigna una probabilidad al símbolo que realmente sigue. La NLL por evento mide la sorpresa promedio del modelo:
-\[
-\operatorname{NLL}
-=
--\frac{1}{T}\sum_{t=1}^{T}\log P(y_t\mid c_t),
-\qquad
-\operatorname{perplexity}=\exp(\operatorname{NLL}).
-\]
-La penalización disminuye cuando el modelo concentra mayor probabilidad en los eventos observados. Valores menores de NLL y \emph{perplexity} indican, por tanto, mejor predicción. De manera aproximada, una \emph{perplexity} igual a $q$ puede leerse como si el modelo dudara entre $q$ alternativas igualmente probables en cada paso. La distribución real no tiene que ser uniforme, pero esta imagen permite entender por qué un valor menor es preferible. NLL y \emph{perplexity} expresan la misma información en escalas distintas y no constituyen dos evidencias independientes.
-
-La Tabla~\ref{tab:chapter4-metricas-lectura} resume cómo se decide si la ventaja de un modelo es predictiva, consistente entre obras o solamente computacional. La comparación no depende de una sola cifra: la NLL mide la calidad predictiva, el análisis pareado comprueba si la diferencia se repite entre obras y los tiempos describen el costo observado.
-
-\begin{table}[H]
-\centering
-\small
-\setlength{\tabcolsep}{5pt}
-\input{chapters/tables/chapter4_metricas_lectura}
-\caption{Lectura de las métricas utilizadas en la comparación. Las medidas de predicción determinan qué modelo asigna más probabilidad a las notas de prueba; las de costo se interpretan por separado.}
-\label{tab:chapter4-metricas-lectura}
-\end{table}
-
-Usar la misma fórmula no basta para garantizar una comparación equitativa: los modelos deben puntuar exactamente los mismos eventos. El símbolo de inicio se utiliza como contexto, pero no cuenta como una nota adicional que deba predecirse. El símbolo de relleno del transformador tampoco se incluye entre los eventos puntuados. Los conjuntos de validación y prueba se dividen en segmentos no superpuestos de hasta $128$ eventos, incluida la cola final aunque sea corta. Cada nota de prueba se puntúa una sola vez, con los mismos reinicios de contexto en las cuatro familias.
-
-La igualdad de la evaluación no implica que el entrenamiento sea idéntico. El transformador se ajusta con ventanas de hasta $128$ eventos y un desplazamiento de $64$, de modo que algunos objetivos aparecen en más de una ventana. Los modelos clásicos recorren cada secuencia sin ese solapamiento. Esta diferencia conserva la tarea de prueba común, pero impide atribuir toda la ventaja observada únicamente a la arquitectura: también cambia el número efectivo de exposiciones durante el aprendizaje. La Sección~\ref{sec:chapter4-sensibilidad} mide por separado cuánto cambia el resultado al eliminar ese solapamiento.
-
-La tarea común tiene un alcance limitado. La clase de altura conserva la identidad de la nota módulo octava, pero omite duración, registro, dinámica y buena parte de la organización métrica. El experimento estudia regularidades secuenciales en un alfabeto compartido, no toda la información de la partitura.
-
-\section{Cómo se construye la comparación}
-
-La obra canónica es la unidad básica de partición. El identificador se construye normalizando la combinación de compositor y título; después, los archivos con el mismo identificador se asignan siempre al mismo conjunto. Esta regla reduce el riesgo de entrenar con una versión y evaluar con otra casi equivalente, pero su exactitud depende de los metadatos y no demuestra que todas las variantes musicales hayan sido reconocidas. Con semilla $7$, se reserva el $15\%$ de las obras para prueba y el $10\%$ para validación; el resto se utiliza para entrenamiento.
-
-Sobre esa partición se construyen subconjuntos anidados con el $10\%$, $25\%$, $50\%$, $75\%$ y $100\%$ del acervo de entrenamiento. Cada fracción amplía la anterior para una misma semilla, en lugar de reemplazarla por un conjunto distinto. Esto permite observar cómo cambia el desempeño de cada modelo al aumentar los datos disponibles. Las semillas de datos $1$, $2$ y $3$ cambian el orden de incorporación de las obras, mientras que las semillas de modelo $1$ y $2$ modifican la inicialización.
-
-En la fracción completa, cambiar la semilla de datos ya no cambia el subconjunto. Las tres filas correspondientes contienen el mismo acervo y no son tres muestras independientes. La repetición no altera la comparación pareada por obra, pero la dispersión del último punto de la curva debe leerse con cautela.
-
-Las configuraciones se seleccionan únicamente con validación. Para el HMM finito se comparan $12$, $24$ y $48$ estados, mientras que para el HDP-HMM se fija una cota de $24$ estados latentes y se contrastan tres combinaciones de hiperparámetros. El transformador conserva una arquitectura pequeña de tres capas y dimensión interna $128$. Para el VOMM se comparan los órdenes $1$, $2$, $4$ y $8$. La Tabla~\ref{tab:chapter4-experimental-protocol} reúne la configuración de la corrida.
-
-\begin{table}[H]
-\centering
-\caption{Protocolo ejecutado para la comparación predictiva}
-\label{tab:chapter4-experimental-protocol}
-\resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_experimental_protocol}}
-\end{table}
-
-La corrida descrita constituye el análisis principal y conserva las cinco fracciones de entrenamiento. Después se ejecutaron cuatro comprobaciones en la fracción completa, cada una con una sola modificación: ventanas sin solapamiento para el transformador (desplazamiento $128$), una rejilla más amplia para el HMM finito ($K\in\{48,96,144,192\}$) y dos semillas alternativas de partición, $17$ y $29$. Estas corridas no se añaden a la curva como si fueran nuevas réplicas. Los análisis posteriores permiten examinar por separado tres decisiones del protocolo: exposición durante el entrenamiento, capacidad del HMM y composición de los conjuntos. El informe de auditoría registra como completas tanto la corrida principal como las cuatro sensibilidades.
-
-El análisis final toma la obra como unidad de comparación. Primero se promedian las variantes y repeticiones de una misma obra. Después se calcula, para cada par de modelos, la diferencia de NLL sobre las mismas piezas. De este modo, cada obra aporta un punto y una pieza larga no se convierte, por su número de notas, en centenares de observaciones independientes. Para la diferencia media se obtiene un intervalo \emph{bootstrap} marginal del $95\%$ mediante $10\,000$ remuestreos de las obras. La prueba de rangos con signo de Wilcoxon examina por separado el signo y el orden de las diferencias pareadas, y el ajuste de Holm controla la familia de seis valores $p$ \cite{wilcoxon1945,holm1979,efron1979,demsar2006}. El intervalo y la prueba no estiman exactamente la misma cantidad: el primero se refiere a la media y la segunda a la distribución de las diferencias. Ambos análisis están condicionados a la muestra, la partición y las configuraciones utilizadas; no incorporan variación entre particiones alternativas.
-
-Antes de interpretar una diferencia entre modelos debe verificarse que todos resuelvan la misma tarea. En la corrida final, el símbolo de inicio del VOMM funciona como contexto y el relleno del transformador queda fuera del cálculo de la puntuación. Una auditoría compara, obra por obra, los eventos esperados con los evaluados. Cualquier omisión, duplicación o alteración del orden invalida la corrida; no se corrige modificando el denominador.
-
-Durante cada celda, el programa conserva en memoria el modelo elegido por validación. El archivo de reanudación guarda las filas y predicciones de las celdas terminadas y tolera una última línea incompleta, pero no conserva pesos que permitan continuar un ajuste interrumpido a mitad de una celda. La caché evita repetir el preprocesamiento. Los cálculos reescalados y vectorizados de ambos HMM se contrastan mediante pruebas de regresión con las versiones que operan en dominio logarítmico. Estas comprobaciones verifican que la corrida cumpla las condiciones computacionales previstas; no constituyen un resultado musical.
-
-Bajo este protocolo, la corrida \texttt{tesis\_3000\_gpu\_20260823\_1941} terminó el 23 de agosto de 2026. Se muestrearon $3000$ archivos del corpus PDMX con semilla $7$ \cite{long2024pdmx}. El preprocesamiento dejó $2933$ piezas utilizables y excluyó $67$, para un total de $693\,754$ eventos. El conjunto de prueba reunió $424$ piezas. En la fracción completa, el entrenamiento utilizó $2173$ piezas y $500\,959$ eventos.
-
-Las tres semillas de datos y las cinco fracciones de entrenamiento forman quince celdas. En cada una se ajustaron dos inicializaciones del HMM finito, del HDP-HMM y del transformador, junto con un VOMM determinista. El diseño produjo $105$ filas. El transformador se ajustó en GPU mediante CUDA; los tres modelos restantes se ejecutaron en CPU con doce procesos. Los tiempos observados corresponden, por tanto, a dispositivos distintos.
-
-La ejecución se interrumpió previamente como medida preventiva ante la temperatura del equipo. Al reanudarla, se recuperaron los $3000$ archivos desde la caché y se omitieron las celdas ya terminadas. La interrupción no invalidó el experimento porque esas celdas conservaron sus resultados. Aun así, confirmó la necesidad práctica de distinguir entre un punto de reanudación de resultados y una copia del estado de cada modelo, además de controlar por separado la carga de CPU y GPU.
 
 \section{Qué cambia cuando aumenta el corpus}
 
@@ -190,7 +129,7 @@ La \emph{perplexity} media de prueba aparece en la Tabla~\ref{tab:chapter4-learn
 \resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_learning_curve_results}}
 \end{table}
 
-La Figura~\ref{fig:chapter4-learning-curve} permite ver la forma de la curva, mientras que la tabla conserva los valores exactos. Las barras representan dispersión entre semillas dentro de la partición principal; no incluyen la variación debida a construir otras particiones del corpus.
+La Figura~\ref{fig:chapter4-learning-curve} muestra la forma de la curva y la tabla conserva los valores exactos. Las barras representan la dispersión entre semillas dentro de la partición principal; no incluyen otras particiones del corpus.
 
 \begin{figure}[htbp]
   \centering
@@ -201,7 +140,7 @@ La Figura~\ref{fig:chapter4-learning-curve} permite ver la forma de la curva, mi
 
 Las curvas se separan al añadir obras. El transformador reduce su \emph{perplexity} de $7.640$ a $5.823$, un cambio de $23.8\%$. El HMM finito pasa de $7.655$ a $7.356$ y el HDP-HMM de $8.223$ a $7.968$, con reducciones de $3.9\%$ y $3.1\%$, respectivamente. El VOMM queda en una posición intermedia y reduce su valor en $8.4\%$. Dentro del intervalo estudiado, el transformador sigue beneficiándose del aumento del corpus; las configuraciones evaluadas de los otros modelos muestran reducciones menores.
 
-Al resumir todos los eventos de la fracción completa, el orden predictivo es transformador, HMM finito, HDP-HMM y VOMM, con \emph{perplexity} $5.823$, $7.356$, $7.968$ y $8.022$, respectivamente. Este orden describe la predicción promedio por evento. Más adelante, la comparación pareada por obra muestra por qué también importa comprobar cómo se distribuye la diferencia entre piezas.
+En la fracción completa, el orden por evento es transformador, HMM finito, HDP-HMM y VOMM, con \emph{perplexity} $5.823$, $7.356$, $7.968$ y $8.022$, respectivamente. La comparación pareada muestra a continuación cómo se distribuyen las diferencias entre obras.
 
 \FloatBarrier
 
@@ -216,11 +155,13 @@ Los promedios sobre todos los eventos pueden quedar dominados por unas cuantas p
 \resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_pairwise_results}}
 \end{table}
 
-La diferencia media entre el HMM finito y el transformador es de $0.2505$ nats por evento, con intervalo marginal $[0.2367,0.2641]$, a favor del transformador. El nat es la unidad que resulta de utilizar el logaritmo natural en la NLL. Frente al HDP-HMM, la diferencia es de $0.3576$ nats. Ninguno de los seis intervalos marginales incluye el cero y todos los valores $p$ de Wilcoxon permanecen por debajo de $0.05$ después del ajuste de Holm. Con este número de obras, la magnitud de las diferencias y sus intervalos son más informativos que un valor $p$ aislado; los valores $p$ aportan una comprobación distinta y no deben leerse como otra medida del tamaño de la mejora.
+La diferencia media entre el HMM finito y el transformador es de $0.2505$ nats por evento, con intervalo marginal $[0.2367,0.2641]$, a favor del transformador. El nat es la unidad que resulta de utilizar el logaritmo natural en la NLL. Frente al HDP-HMM, la diferencia es de $0.3576$ nats. Ninguno de los seis intervalos marginales incluye el cero y todos los valores $p$ de Wilcoxon permanecen por debajo de $0.05$ después del ajuste de Holm.
 
-La comparación entre HDP-HMM y VOMM muestra el efecto de elegir una unidad de análisis. Al sumar primero todos los eventos, las obras largas reciben mayor peso y el promedio favorece ligeramente al HDP-HMM por $0.0076$ nats. Cuando cada obra recibe el mismo peso, el contraste favorece al VOMM por $0.0336$ nats. Son preguntas distintas: esta tesis adopta la obra como unidad principal y conserva la ponderación por eventos como lectura secundaria.
+Con este número de obras, la magnitud de las diferencias y sus intervalos son más informativos que un valor $p$ aislado. Los valores $p$ aportan una comprobación distinta y no deben leerse como otra medida del tamaño de la mejora.
 
-La Figura~\ref{fig:chapter4-analysis-unit} permite entender de dónde proviene el cambio. Los dos cuartiles intermedios favorecen al VOMM, mientras que los intervalos de los cuartiles extremos cruzan el cero y no resuelven el signo. Lo que sí puede afirmarse es que ambos promedios responden a ponderaciones distintas: en uno cada obra tiene el mismo peso; en el otro, las obras largas aportan más eventos.
+La comparación entre HDP-HMM y VOMM cambia con la unidad de análisis. Al sumar todos los eventos, las obras largas reciben mayor peso y el promedio favorece al HDP-HMM por $0.0076$ nats. Cuando cada obra pesa lo mismo, el contraste favorece al VOMM por $0.0336$ nats. El análisis principal utiliza la obra como unidad; la ponderación por eventos queda como lectura secundaria.
+
+La Figura~\ref{fig:chapter4-analysis-unit} localiza el cambio. Los dos cuartiles intermedios favorecen al VOMM; los intervalos de los cuartiles extremos cruzan el cero. En una media cada obra pesa lo mismo; en la otra, las obras largas aportan más eventos.
 
 \begin{figure}[htbp]
   \centering
@@ -232,15 +173,15 @@ La Figura~\ref{fig:chapter4-analysis-unit} permite entender de dónde proviene e
 \section{Sensibilidad de la comparación}
 \label{sec:chapter4-sensibilidad}
 
-El resultado principal plantea tres dudas razonables. El transformador recibió objetivos solapados; el HMM finito quedó limitado por su primera rejilla; y una sola partición podría favorecer de manera accidental a algún modelo. Las cuatro corridas posteriores cambian un factor a la vez. Este diseño facilita atribuir cada cambio, pero no permite conocer sus interacciones.
+Cuatro corridas de sensibilidad modifican un factor a la vez: el solapamiento de las ventanas del transformador, la capacidad del HMM finito y la partición de los datos. Este diseño aísla cada cambio, sin estimar sus interacciones.
 
-La Figura~\ref{fig:chapter4-sensitivities} resume los tres cambios en una escala compartida. El panel A corresponde a la exposición del transformador, el B a la capacidad del HMM finito y el C a las particiones alternativas. La prosa siguiente precisa qué comparación admite cada panel y qué factores permanecen confundidos.
+La Figura~\ref{fig:chapter4-sensitivities} reúne los tres cambios: exposición del transformador en el panel A, capacidad del HMM finito en el B y particiones alternativas en el C.
 
-Al aumentar el desplazamiento del transformador de $64$ a $128$, cada evento aparece una sola vez como objetivo por época. Su \emph{perplexity} pasa de $5.8225$ a $6.4394$, un aumento del $10.6\%$, mientras que los tres modelos clásicos permanecen idénticos porque no utilizan esas ventanas. La ventaja pareada del transformador sobre el HMM finito se reduce de $0.2505$ a $0.1521$ nats, es decir, un $39\%$. El orden no cambia, pero la magnitud muestra que parte del resultado depende del régimen de exposición y no sólo de la arquitectura.
+Al aumentar el desplazamiento del transformador de $64$ a $128$, cada evento aparece una sola vez como objetivo por época. Su \emph{perplexity} pasa de $5.8225$ a $6.4394$, un aumento del $10.6\%$; los modelos clásicos no cambian porque no utilizan esas ventanas. La ventaja sobre el HMM finito se reduce de $0.2505$ a $0.1521$ nats, un $39\%$. El orden se conserva, aunque una parte de la magnitud depende del régimen de exposición.
 
-La ampliación independiente de la rejilla modifica, por su parte, el desempeño del HMM finito: su \emph{perplexity} baja $0.37$ puntos, de $7.3560$ a $6.9835$. Aun con esa mejora, el transformador conserva $5.8225$ y una ventaja pareada de $0.1894$ nats. No se ejecutó una corrida que combinara a la vez la rejilla ampliada y las ventanas sin solapamiento, por lo que estas dos reducciones no deben sumarse ni tratarse como un mismo contraste.
+La ampliación independiente de la rejilla modifica el desempeño del HMM finito: su \emph{perplexity} baja $0.37$ puntos, de $7.3560$ a $6.9835$. Aun con esa mejora, el transformador mantiene una \emph{perplexity} de $5.8225$ y una ventaja pareada de $0.1894$ nats. No se ejecutó una corrida que combinara la rejilla ampliada y las ventanas sin solapamiento, por lo que estas dos reducciones no deben sumarse ni tratarse como un mismo contraste.
 
-En las treinta selecciones de la corrida principal se eligieron $48$ estados, el valor más alto disponible. Al ampliar la búsqueda hasta $192$ estados, la validación volvió a escoger valores situados en el extremo superior ($144$ o $192$). La ampliación produjo una mejora observable, pero el óptimo no quedó localizado en el intervalo explorado.
+Las treinta selecciones de la corrida principal eligieron $48$ estados, el máximo disponible. Con una búsqueda hasta $192$, la validación volvió a escoger valores del extremo superior ($144$ o $192$). El HMM mejoró, pero el óptimo no quedó localizado.
 
 El diagnóstico de la Figura~\ref{fig:chapter4-finite-hmm-capacity} extiende una sola configuración hasta $K=384$ y llega a la misma conclusión. La \emph{perplexity} de validación continúa descendiendo, mientras que el costo por ajuste crece con rapidez. El punto de $K=384$ requirió $11\,019$ segundos, aproximadamente $3.1$ horas, y una curva completa exige treinta ajustes. La línea cuadrática del panel derecho es una referencia anclada, no un ajuste de ley de escala. Por tanto, la afirmación defendible es que el HMM finito no alcanzó saturación dentro del presupuesto computacional disponible, no que carezca de un óptimo ni que su costo siga exactamente una ley cuadrática.
 
@@ -251,23 +192,23 @@ El diagnóstico de la Figura~\ref{fig:chapter4-finite-hmm-capacity} extiende una
   \label{fig:chapter4-finite-hmm-capacity}
 \end{figure}
 
-Por último, las semillas de partición $17$ y $29$ cambian el nivel de los cuatro modelos, como muestra la Figura~\ref{fig:chapter4-sensitivities}. El recorrido entre particiones supera ampliamente la dispersión entre semillas dentro de la partición principal. Sin embargo, también cambian los tamaños de entrenamiento ---$500\,959$, $529\,127$ y $548\,526$ eventos--- y los HMM finitos de las particiones alternativas conservan el tope de $48$ estados. Por ello, las columnas no estiman un efecto puro de la semilla. La comparación válida se hace dentro de cada partición, y en las tres se conserva el mismo orden pareado por obra: transformador, HMM finito, VOMM y HDP-HMM.
+Las semillas de partición $17$ y $29$ cambian el nivel de los cuatro modelos. La variación entre particiones supera la dispersión entre semillas dentro de la principal. También cambian los tamaños de entrenamiento ($500\,959$, $529\,127$ y $548\,526$ eventos), y los HMM finitos alternativos conservan el tope de $48$ estados; las columnas no estiman un efecto puro de la semilla. Dentro de cada partición se conserva el orden pareado: transformador, HMM finito, VOMM y HDP-HMM.
 
-El HDP-HMM obtiene una \emph{perplexity} mayor que el HMM finito en las cinco fracciones de la corrida principal. En este corpus y para esta tarea, la cardinalidad latente flexible no produjo una ventaja predictiva. Además, las cadenas de las cuatro sensibilidades mostraron deriva y desacuerdo en el número de estados activos, aunque alcanzaron verosimilitudes semejantes. La \emph{perplexity} puede utilizarse como resultado predictivo, pero la cardinalidad latente de estas corridas no debe interpretarse como una estimación estable. Esto no contradice el Capítulo~\ref{chap:ihmm}: allí se estudiaron la log-verosimilitud de ajuste y la complejidad latente sobre otros corpus; aquí se mide predicción fuera de muestra sobre PDMX.
+El HDP-HMM obtiene mayor \emph{perplexity} que el HMM finito en las cinco fracciones. En este corpus y esta tarea, la cardinalidad latente flexible no dio una ventaja predictiva. Las cadenas de las cuatro sensibilidades mostraron deriva y desacuerdo en el número de estados activos pese a alcanzar verosimilitudes semejantes; esa cardinalidad no es una estimación estable. El Capítulo~\ref{chap:ihmm} evalúa ajuste y complejidad latente en otros corpus; esta sección evalúa predicción fuera de muestra sobre PDMX.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figures/chapter4/fig3_sensibilidades.pdf}
-  \caption{Sensibilidad de la \emph{perplexity} en la fracción completa. Los paneles A y B modifican por separado la exposición del transformador y la rejilla del HMM finito; el panel C muestra el recorrido entre tres particiones de la misma muestra. El segmento de $\pm0.047$ sirve como referencia de la mayor desviación estándar observada entre semillas, no como intervalo de incertidumbre común a todos los modelos.}
+  \caption{Sensibilidad de la \emph{perplexity} en la fracción completa. Los paneles A y B modifican por separado la exposición del transformador y la rejilla del HMM finito; el panel C muestra la variación entre tres particiones de la misma muestra. El segmento de $\pm0.047$ sirve como referencia de la mayor desviación estándar observada entre semillas, no como intervalo de incertidumbre común a todos los modelos.}
   \label{fig:chapter4-sensitivities}
 \end{figure}
 
-La Figura~\ref{fig:chapter4-pairwise-sensitivities} coloca junto a los seis contrastes originales los intervalos obtenidos en las cuatro sensibilidades. En total se examinan treinta comparaciones: ningún intervalo del $95\%$ cruza el cero y el mayor valor $p$ ajustado es $0.0035$. Esta estabilidad no convierte las sensibilidades en una prueba factorial, pero sí muestra que cambiar por separado la exposición, la rejilla del HMM o la partición no invierte el orden pareado.
+La Figura~\ref{fig:chapter4-pairwise-sensitivities} reúne treinta comparaciones: los seis contrastes originales y sus cuatro sensibilidades. Ningún intervalo del $95\%$ cruza el cero y el mayor valor $p$ ajustado es $0.0035$. Cambiar por separado la exposición, la rejilla o la partición no invierte el orden pareado; las interacciones siguen sin medirse.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figures/chapter4/fig4_comparaciones_pareadas.pdf}
-  \caption{Comparaciones pareadas por obra en la corrida principal y las cuatro sensibilidades. La diferencia se define como NLL del modelo A menos NLL del modelo B; el lado del cero indica cuál queda favorecido. El punto y el intervalo estrecho corresponden a la corrida principal, y la banda clara reúne el recorrido de los intervalos de las sensibilidades.}
+  \caption{Comparaciones pareadas por obra en la corrida principal y las cuatro sensibilidades. La diferencia se define como NLL del modelo A menos NLL del modelo B; el lado del cero indica cuál queda favorecido. El punto y el intervalo estrecho corresponden a la corrida principal, y la banda clara abarca los intervalos obtenidos en las sensibilidades.}
   \label{fig:chapter4-pairwise-sensitivities}
 \end{figure}
 
@@ -275,7 +216,7 @@ La Figura~\ref{fig:chapter4-pairwise-sensitivities} coloca junto a los seis cont
 
 \section{El costo de la mejora predictiva}
 
-La calidad predictiva no describe por sí sola el costo de obtenerla. La Tabla~\ref{tab:chapter4-cost-results} presenta el tiempo observado de selección y ajuste, el tiempo de evaluación y el tamaño del modelo en sus unidades originales. No se combinan en una sola puntuación porque un segundo de cómputo, un parámetro y una unidad de NLL no son cantidades intercambiables.
+La Tabla~\ref{tab:chapter4-cost-results} presenta el tiempo de selección y ajuste, el tiempo de evaluación y el tamaño del modelo. Las tres medidas permanecen separadas porque sus unidades no son intercambiables.
 
 \begin{table}[H]
 \centering
@@ -287,7 +228,7 @@ La calidad predictiva no describe por sí sola el costo de obtenerla. La Tabla~\
 \end{flushleft}
 \end{table}
 
-Con la configuración disponible, el transformador registró $169$ segundos, frente a $578$ del HDP-HMM y $628$ del HMM finito. Los tiempos de ambos HMM abarcan tres candidatos de validación y el del VOMM cuatro órdenes; el transformador conserva una arquitectura y selecciona la época mediante detención temprana. La comparación tampoco es neutral respecto del hardware: el transformador se ejecutó en una GPU RTX~4060 y los otros modelos en CPU. Por tanto, el menor tiempo observado sólo es válido para esta máquina, estas implementaciones y estos presupuestos de selección; no demuestra que un solo ajuste del transformador sea más barato que un solo ajuste de cada alternativa.
+El transformador registró $169$ segundos, frente a $578$ del HDP-HMM y $628$ del HMM finito. Ambos HMM seleccionan entre tres candidatos, el VOMM entre cuatro órdenes y el transformador entre épocas de una arquitectura. Además, el transformador se ejecutó en una GPU RTX~4060 y los otros modelos en CPU. Son tiempos de este protocolo y esta máquina, no \emph{benchmarks} neutrales de un ajuste aislado.
 
 El VOMM tiene el menor tiempo de selección y ajuste, $41$ segundos, pero tarda más en evaluar y obtiene peor NLL que el transformador y el HMM finito. Si se consideran únicamente la NLL de prueba y el tiempo de selección y ajuste, como en la Figura~\ref{fig:chapter4-pareto}, el VOMM y el transformador forman la frontera de Pareto, y el transformador domina a ambos HMM \cite{miettinen1999}. Si se añade el tiempo de evaluación como tercer indicador, ninguna implementación domina a las demás. Estas fronteras describen el protocolo y el hardware utilizados, no una propiedad intrínseca de las familias. También son parciales porque aún falta medir la calidad estructural.
 
@@ -300,34 +241,47 @@ El VOMM tiene el menor tiempo de selección y ajuste, $41$ segundos, pero tarda 
 
 Ampliar la rejilla del HMM finito muestra además que el costo no es estable frente a la capacidad buscada. En la sensibilidad con $K\leq192$, el tiempo medio de selección y ajuste pasó de $628$ a $3843$ segundos, un factor de $6.1$, a cambio de reducir la \emph{perplexity} en $0.37$. Los tiempos de la partición con semilla $29$ no se utilizan para este análisis porque esa corrida compartió la CPU con el diagnóstico de capacidad; la contención de CPU eleva los tiempos observados, aunque no modifica las predicciones determinadas por las semillas.
 
+La comparación anterior describe el costo completo del protocolo, incluida la elección de configuraciones. Para separar ese costo del ajuste final, se ejecutó un segundo experimento con las configuraciones ya fijadas por la corrida principal. Se conservaron la partición con semilla $7$, la fracción completa y la semilla de modelo $1$. Cada familia se repitió tres veces bajo la misma carga de datos y sin otros trabajos intensivos. Son repeticiones técnicas para medir tiempo y memoria; no añaden tres observaciones independientes al análisis predictivo.
+
+La Tabla~\ref{tab:chapter4-resource-benchmark} presenta la mediana y el intervalo observado entre el mínimo y el máximo. Los costos se calcularon con la media de los tiempos y dos tarifas de referencia registradas el 3 de septiembre de 2026 para la región \texttt{us-central1}: USD~$0.071696$ por hora para una instancia \texttt{n2-highcpu-2} y USD~$0.421696$ por hora para esa instancia con una GPU NVIDIA T4 \cite{googlecloud2026computepricing,googlecloud2026gpupricing}. Se trata de un escenario de servicio remoto, no del gasto de la estación de trabajo.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Medición de recursos con configuraciones fijadas. Los tiempos muestran mediana [mínimo, máximo] de tres repeticiones. El primer costo incluye un ajuste; el segundo, el ajuste y cien evaluaciones. Los costos proceden de las medias de tiempo y de las tarifas documentadas en el escenario.}
+\label{tab:chapter4-resource-benchmark}
+\resizebox{\textwidth}{!}{\input{chapters/tables/chapter4_resource_benchmark}}
+\end{table}
+
+En este ensayo, el ajuste del transformador tomó una mediana de $186.0$ segundos, frente a $255.1$ del HMM finito y $199.7$ del HDP-HMM. El VOMM necesitó $1.80$ segundos. La evaluación invierte parte de ese orden: los dos HMM tardaron alrededor de $0.6$ segundos, el transformador $2.66$ y el VOMM $9.91$. El valor de NLL fue idéntico en las tres repeticiones de cada modelo, como corresponde a configuraciones y semillas fijas. Por ello, este ensayo confirma la estabilidad técnica del procedimiento, pero no reemplaza los resultados predictivos obtenidos con varias obras y semillas.
+
+La menor duración del transformador frente a los HMM no se tradujo en menor costo dentro del escenario elegido. La tarifa horaria de GPU fue $5.88$ veces la de CPU: un ajuste del transformador se estimó en USD~$0.0216$, frente a USD~$0.0051$ para el HMM finito y USD~$0.0040$ para el HDP-HMM. Con cien evaluaciones, las estimaciones fueron USD~$0.0530$, USD~$0.0063$ y USD~$0.0052$, respectivamente. El VOMM mantuvo el menor costo en ambos escenarios, aunque su evaluación fue la más lenta.
+
+Los puntos de equilibrio permiten separar el resultado de una tarifa particular. Para que el ajuste del transformador costara menos que el del HMM finito, la razón $c_{\mathrm{GPU}}/c_{\mathrm{CPU}}$ tendría que ser inferior a $1.38$; frente al HDP-HMM, inferior a $1.08$. El escenario documentado queda por encima de ambos valores. Estos cálculos no incluyen almacenamiento, desarrollo, mantenimiento ni amortización fuera de lo que ya esté comprendido en la tarifa.
+
+La memoria exige una lectura más cauta. Para el transformador se midió un máximo de $175\,349\,760$ bytes asignados y $205\,520\,896$ bytes reservados por CUDA durante el ajuste, aproximadamente $167$ y $196$ MiB. En cambio, la RAM se registró como el máximo absoluto del proceso y sus hijos. Los cuatro modelos se ejecutaron en secuencia dentro del mismo proceso; después de cargar PyTorch, parte de esa memoria permaneció reservada. El valor del VOMM, ejecutado al final, incluye por tanto memoria retenida por etapas anteriores. Esos máximos sirven para describir la envolvente de la ejecución completa, pero no para ordenar el consumo propio de RAM de cada familia.
+
 \section{Viabilidad de la solución y responsabilidad profesional}
 \label{sec:chapter4-viabilidad}
 
-Pasar de un resultado experimental a una solución utilizable exige distinguir entre dos afirmaciones: que el sistema funcione durante una corrida y que resulte viable en un contexto de uso. La evidencia reunida permite examinar con mayor detalle la viabilidad tecnológica; para los ejes económico y social sólo permite delimitar condiciones y formular estimaciones, pues no se registró gasto monetario ni se realizó un estudio con usuarios. Los tres ejes no tienen, por tanto, el mismo grado de respaldo empírico.
+El sistema ejecutó de extremo a extremo la preparación de datos, la selección, el ajuste, la evaluación y la reanudación. Esta evidencia sustenta la viabilidad tecnológica del prototipo. La evaluación económica se apoya en tiempos medidos y escenarios de tarifas; no representa un gasto efectuado. La dimensión social se limita a condiciones de uso, pues no se realizó un estudio con usuarios.
 
-Desde el punto de vista tecnológico, la solución integra preparación de datos, particiones por obra, selección de configuraciones, ajuste, evaluación pareada y reanudación de resultados. Las cinco corridas auditadas muestran que el flujo puede ejecutarse en una estación de trabajo con CPU y GPU. Aun así, la interrupción preventiva por temperatura, la falta de un punto de reanudación dentro de cada ajuste y la ausencia de los artefactos primarios en el repositorio público limitan su operación y reproducción. El HMM finito plantea además una restricción de capacidad: su búsqueda siguió alcanzando el extremo superior de la rejilla. En consecuencia, se acredita la viabilidad de un prototipo de investigación bajo recursos semejantes a los utilizados, no la de un servicio de producción ni la de una herramienta de análisis estructural validada.
+Las cinco corridas auditadas se completaron en una estación de trabajo con CPU y GPU.
 
-La dimensión económica puede expresarse sin atribuir precios que no se midieron. Sean $c_{\mathrm{GPU}}$ y $c_{\mathrm{CPU}}$ los costos horarios de las configuraciones completas de GPU y CPU empleadas, en una misma moneda. Si se considera únicamente la selección y el ajuste de la fracción completa, los costos de las corridas observadas serían
-\[
-\begin{aligned}
-C_{\mathrm{Tr}}&=\frac{169}{3600}c_{\mathrm{GPU}}, &
-C_{\mathrm{HDP}}&=\frac{578}{3600}c_{\mathrm{CPU}},\\
-C_{\mathrm{HMM}}&=\frac{628}{3600}c_{\mathrm{CPU}}, &
-C_{\mathrm{VOMM}}&=\frac{41}{3600}c_{\mathrm{CPU}}.
-\end{aligned}
-\]
-Esta formulación permite calcular puntos de equilibrio para cualquier tarifa documentada. El transformador tendría menor costo monetario de ejecución que el HDP-HMM si $c_{\mathrm{GPU}}/c_{\mathrm{CPU}}<3.42$, y que el HMM finito si la razón fuera menor que $3.72$. Frente al VOMM, la condición sería $c_{\mathrm{GPU}}/c_{\mathrm{CPU}}<0.24$. Estos umbrales traducen los tiempos de la Tabla~\ref{tab:chapter4-cost-results}; no son precios observados ni una evaluación del costo total. Tampoco igualan los presupuestos de búsqueda entre familias e ignoran la evaluación repetida, el almacenamiento y el trabajo de implementación. Si el caso de uso exigiera muchas predicciones después del ajuste, habría que incorporar además los tiempos de evaluación antes de decidir qué alternativa resulta más económica.
+Hubo una interrupción preventiva por temperatura, no existe reanudación dentro de cada ajuste y los artefactos primarios de la comparación predictiva no están en el repositorio público. Además, la búsqueda del HMM finito alcanzó el extremo superior de la rejilla. La medición posterior separa el ajuste final y documenta el entorno, pero conserva dispositivos distintos para CPU y GPU y no atribuye la RAM de forma independiente. La evidencia corresponde a un prototipo de investigación con recursos semejantes a los utilizados, no a un servicio de producción ni a una herramienta estructural validada.
 
-La viabilidad social depende de quién usaría el sistema y con qué propósito. El prototipo puede servir a personas que investigan modelos secuenciales o desarrollan herramientas de análisis musical, siempre que la tarea requerida sea la predicción de clases de altura y se acepten las omisiones de duración, registro, dinámica y métrica. No se evaluó su utilidad con usuarios, ni la muestra se auditó para establecer representatividad por tradición, época o procedencia. Tampoco se midió un beneficio educativo, creativo o cultural. Por ello, estos usos describen un alcance posible y no un impacto demostrado. Cualquier distribución de datos, modelos o resultados debe conservar la procedencia y respetar las licencias del corpus, de las obras y de las bibliotecas empleadas.
+El prototipo puede servir a quienes investigan modelos secuenciales o desarrollan herramientas de análisis musical, siempre que la tarea sea predecir clases de altura y se acepten las omisiones de duración, registro, dinámica y métrica. No se evaluó su utilidad con usuarios, la representatividad de la muestra por tradición, época o procedencia, ni un beneficio educativo, creativo o cultural. Cualquier distribución debe conservar la procedencia y respetar las licencias del corpus, de las obras y de las bibliotecas.
 
-La responsabilidad profesional consiste, en este caso, en no convertir una métrica conveniente en una afirmación que el experimento no sustenta. Una NLL menor significa que el modelo asignó mayor probabilidad a los eventos de prueba; no significa que comprenda la música, que explique mejor una obra o que haya recuperado su estructura. Antes de emplear las trayectorias o la atención en decisiones musicológicas, pedagógicas o creativas, harían falta referencias externas y validación para ese uso concreto. Un despliegue responsable requeriría también documentar versiones, configuraciones, cobertura del corpus, recursos necesarios y condiciones de licencia, además de mantener revisión humana cuando la salida se interprete musicalmente. Bajo estas condiciones, la ventaja predictiva del transformador puede justificar su complejidad en aplicaciones que valoren esa mejora; no basta, por sí sola, para preferirlo cuando se priorizan costo mínimo, inspección directa o interpretación estructural.
+Una NLL menor significa que el modelo asignó mayor probabilidad a los eventos de prueba. No implica comprensión musical, una mejor explicación de la obra ni recuperación de su estructura.
+
+Antes de utilizar las trayectorias o la atención para sustentar decisiones musicológicas, pedagógicas o creativas, harían falta referencias externas y una validación específica. Un despliegue responsable también requeriría documentar versiones, configuraciones, cobertura del corpus, recursos necesarios y condiciones de licencia, además de mantener la revisión humana cuando la salida se interprete musicalmente. La ventaja predictiva del transformador puede justificar su complejidad en aplicaciones que valoren esa mejora, pero no cuando se priorizan el costo mínimo, la inspección directa o la interpretación estructural.
 
 \section{Lo que la predicción todavía no responde}
 
-La NLL indica qué modelo asigna mayor probabilidad a las notas de prueba, pero no dice si una trayectoria latente coincide con una organización musical reconocible. Para responder esa pregunta hacen falta fronteras o etiquetas estructurales anotadas de manera independiente en las mismas obras. Con esa referencia podrían compararse los puntos de cambio y las particiones inferidas mediante $F_1$ de fronteras, información mutua normalizada e índice de Rand ajustado.
+Para saber si una trayectoria latente coincide con una organización musical reconocible hacen falta fronteras o etiquetas anotadas de manera independiente en las mismas obras. Con esa referencia podrían compararse puntos de cambio y particiones mediante $F_1$ de fronteras, información mutua normalizada e índice de Rand ajustado.
 
-La corrida no dispuso de anotaciones de referencia ni produjo fronteras o segmentaciones comparables para los cuatro modelos; el artefacto estructural registró \texttt{not\_evaluated}. Por ello no se calcularon esas métricas. La atención del transformador y los estados de los HMM siguen siendo hipótesis de organización: la menor NLL o la existencia de una trayectoria no demuestran que se hayan recuperado frases, secciones o funciones armónicas.
+La corrida no dispuso de anotaciones de referencia ni produjo segmentaciones comparables para los cuatro modelos; el artefacto estructural registró \texttt{not\_evaluated}. No se calcularon esas métricas. La atención del transformador y los estados de los HMM siguen siendo hipótesis de organización.
 
-La comparación predictiva también tiene límites concretos. Las sensibilidades resolvieron las dudas inmediatas sobre exposición, una primera ampliación de capacidad y dos particiones adicionales, pero no sus interacciones. El óptimo del HMM finito no quedó localizado dentro de la rejilla explorada y los diagnósticos del HDP-HMM no acreditan una cardinalidad latente estable. Para obtener tiempos comparables entre familias haría falta ejecutar recursos y presupuestos de selección equivalentes. Las corridas fueron auditadas en la máquina de ejecución y sus figuras finales quedaron versionadas; sin embargo, los CSV y JSON primarios no están incluidos en el repositorio público, por lo que una clonación limpia no basta para regenerar los resultados.
+La comparación predictiva también tiene límites concretos. Las sensibilidades resolvieron las dudas inmediatas sobre exposición, una primera ampliación de capacidad y dos particiones adicionales, pero no sus interacciones. El óptimo del HMM finito no quedó localizado dentro de la rejilla explorada y los diagnósticos del HDP-HMM no acreditan una cardinalidad latente estable. La medición de recursos igualó el número de repeticiones y separó el ajuste final, pero mantuvo el transformador en GPU y los demás modelos en CPU. Las corridas fueron auditadas en la máquina de ejecución y sus figuras finales quedaron versionadas; sin embargo, los CSV y JSON primarios de la comparación predictiva no están incluidos en el repositorio público, por lo que una clonación limpia no basta para regenerar todos los resultados.
 
 En la corrida principal, el transformador obtiene la menor \emph{perplexity} desde la fracción $0.25$, y su diferencia frente a los otros modelos aumenta al incorporar más obras. En la fracción completa conserva el primer lugar en cada sensibilidad por separado: tanto en la corrida con la rejilla ampliada del HMM como, de manera independiente, en la corrida con ventanas sin solapamiento. El VOMM ofrece la selección y el ajuste más breves, pero no la mejor predicción. La estabilidad se refiere a tres particiones de una misma muestra y a cambios aislados del protocolo; no permite ordenar los modelos por su capacidad para representar la organización musical hasta que se incorpore la referencia estructural faltante.

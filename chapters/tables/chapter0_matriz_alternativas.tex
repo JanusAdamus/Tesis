@@ -1,0 +1,20 @@
+\begin{table}[H]
+\centering
+\caption{Matriz cualitativa de las alternativas de diseño. La decisión final depende del propósito de uso y de los resultados del protocolo común; no se asignaron pesos retrospectivos.}
+\label{tab:chapter0-decision-matrix}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.16}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{0.14\textwidth} p{0.21\textwidth} p{0.20\textwidth} p{0.24\textwidth} p{0.13\textwidth}}
+\hline
+Alternativa & Forma de incorporar contexto & Salida que puede inspeccionarse & Restricción relevante & Papel en la comparación \tabularnewline
+\hline
+HMM finito & Transiciones entre un número fijo de estados latentes & Trayectoria de estados y probabilidades de transición & La capacidad depende de la rejilla elegida y el costo crece al ampliar el número de estados & Referencia latente de capacidad controlada \tabularnewline
+HDP-HMM truncado & Inventario jerárquico de estados, limitado por una cota de cómputo & Trayectoria y número efectivo de estados ocupados & Requiere revisar convergencia, deriva y efecto de la truncación & Alternativa latente flexible \tabularnewline
+VOMM & Contextos observables de longitud variable & Conteos y probabilidades por contexto & La longitud máxima se selecciona en validación y no hay estados latentes & Referencia predictiva explícita \tabularnewline
+Transformador causal & Atención sobre una ventana de eventos anteriores & Distribución predictiva del siguiente evento & Exige más parámetros y su atención no equivale a una trayectoria discreta & Alternativa de mayor capacidad contextual \tabularnewline
+\hline
+\end{tabular}
+}
+\end{table}

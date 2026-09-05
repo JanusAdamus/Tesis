@@ -1,0 +1,18 @@
+\begin{table}[H]
+\centering
+\caption{Síntesis de los antecedentes que sustentan las alternativas consideradas. El límite indicado corresponde a la comparación de esta tesis, no a una valoración general de cada familia.}
+\label{tab:chapter0-state-of-art}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.16}
+\begin{tabular}{p{0.16\textwidth} p{0.24\textwidth} p{0.25\textwidth} p{0.25\textwidth}}
+\hline
+Línea de trabajo & Recurso principal & Aporte al diseño & Límite que permanece \tabularnewline
+\hline
+HMM finito \cite{rabiner1989,cappe2005,sheh2003} & Estados latentes y algoritmos establecidos de inferencia & Ofrece una trayectoria discreta y una referencia con capacidad controlada & El número de estados se fija antes del ajuste y su significado musical requiere evidencia externa \tabularnewline
+HDP-HMM \cite{teh2006,fox2011} & Inventario latente flexible dentro de una cota computacional & Permite estudiar cuántos estados ocupa el modelo sin imponer que todos se utilicen & La ocupación no equivale a estructura musical y debe acompañarse de diagnósticos de inferencia \tabularnewline
+VOMM \cite{begleiter2004} & Conteos observables con longitud de contexto variable & Proporciona una referencia predictiva explícita y de ajuste directo & No produce una trayectoria latente comparable con la de los HMM \tabularnewline
+Transformador causal \cite{vaswani2017,huang2018musictransformer} & Atención sobre los eventos anteriores dentro de una ventana & Incorpora un contexto observable amplio en la tarea de siguiente evento & La atención no constituye por sí sola una segmentación ni una explicación musical \tabularnewline
+\hline
+\end{tabular}
+\end{table}

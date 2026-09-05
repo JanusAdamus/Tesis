@@ -1,13 +1,13 @@
 \chapter{Preliminares}
 \label{chap:introduction}
 
-Una melodía se percibe como una sucesión organizada, no como una colección de notas independientes. Después de escuchar varios eventos se forman expectativas sobre lo que puede ocurrir a continuación, aunque esas expectativas no determinen una única continuación posible. Esta combinación de regularidad e incertidumbre permite plantear una primera pregunta matemática: ¿qué parte de la continuidad melódica puede describirse mediante probabilidades de transición? La relación entre expectativa musical y aprendizaje estadístico ha sido estudiada tanto desde la teoría musical como desde la cognición de la música \cite{temperley2007,pearce2012}.
+Una melodía se percibe como una sucesión organizada, no como una colección de notas independientes. Después de escuchar varios eventos se forman expectativas sobre lo que puede ocurrir a continuación, aunque esas expectativas no determinen una única continuación posible. De esta combinación de regularidad e incertidumbre surge una primera pregunta matemática: ¿qué parte de la continuidad melódica puede describirse mediante probabilidades de transición? La relación entre expectativa musical y aprendizaje estadístico ha sido estudiada tanto desde la teoría musical como desde la cognición de la música \cite{temperley2007,pearce2012}.
 
 Antes de asignar probabilidades hay que decidir qué cuenta como un evento. Una partitura contiene alturas, duraciones, voces, compases y otros signos, mientras que una cadena de Markov opera sobre una sucesión de símbolos. Reducir la primera a la segunda obliga a precisar qué se observa y qué significa avanzar un paso. Una vez fijada esa secuencia, puede formularse la dependencia markoviana y observarse por qué será necesario introducir estados ocultos.
 
 \section{De la melodía a una secuencia}
 
-En esta tesis, la melodía se estudia a partir de partituras simbólicas. Cada nota seleccionada por el preprocesamiento cuenta como un evento y el índice $n$ indica su lugar en la secuencia. Avanzar de $n$ a $n+1$ no supone que entre ambos eventos transcurra siempre la misma duración física. La comparación experimental del Capítulo~\ref{chap:comparacion-final} utiliza la misma representación para predecir la siguiente clase de altura. Como no se incorporan la duración, el registro, la dinámica ni parte de la organización métrica, las conclusiones tampoco abarcan esos aspectos.
+La representación parte de partituras simbólicas. Cada nota seleccionada por el preprocesamiento cuenta como un evento y el índice $n$ indica su lugar en la secuencia. Avanzar de $n$ a $n+1$ no supone que entre ambos eventos transcurra siempre la misma duración física. La comparación experimental del Capítulo~\ref{chap:comparacion-final} utiliza la misma representación para predecir la siguiente clase de altura. Quedan fuera la duración, el registro, la dinámica y parte de la organización métrica.
 
 La altura puede conservarse con distinto grado de detalle. Una nota con registro, como $C_4$, distingue la octava; una clase de altura agrupa notas equivalentes módulo octava y las representa con un mismo símbolo, como $C$. Para la comparación común se utilizan las doce clases de altura del sistema cromático occidental. La Figura~\ref{fig:teclado-octava} muestra ese alfabeto dentro de una octava del teclado.
 
@@ -77,7 +77,7 @@ La matriz $\mathbf{P}=(P_{ij})_{i,j\in S}$ se denomina \emph{matriz de transici�
 
 Cuando se observa una secuencia y no se impone regularización, una estimación elemental cuenta cuántas veces aparece cada par consecutivo $(i,j)$ y divide por el número de transiciones que parten de $i$. Este cociente es el estimador de máxima verosimilitud de $P_{ij}$. Si un par no aparece, su estimación es cero; con corpus pequeños, esa ausencia puede reflejar falta de datos y no imposibilidad musical. Los mecanismos probabilísticos de los capítulos posteriores buscan precisamente que la estimación no dependa sólo de cada conteo aislado.
 
-La matriz también permite estudiar el comportamiento agregado de la cadena. Un vector de probabilidad $\boldsymbol{\pi}$ es estacionario si
+La matriz también describe el comportamiento agregado de la cadena. Un vector de probabilidad $\boldsymbol{\pi}$ es estacionario si
 \[
 \boldsymbol{\pi}=\boldsymbol{\pi}\mathbf{P}.
 \]
@@ -85,10 +85,10 @@ En una cadena finita, irreducible y aperiódica, existe una única distribución
 \[
 \lim_{n\to\infty}P(X_n=j\mid X_1=i)=\pi_j.
 \]
-Bajo esas condiciones, $\pi_j$ describe la probabilidad a largo plazo del símbolo $j$ dentro del modelo. Se trata de una propiedad de la cadena estimada y no basta por sí sola para identificar tonalidad, función armónica o estilo.
+Bajo esas condiciones, $\pi_j$ describe la probabilidad a largo plazo del símbolo $j$ dentro del modelo. Esta propiedad de la cadena estimada no identifica por sí sola tonalidad, función armónica o estilo.
 
 \section{De la nota observable al contexto latente}
 
-En la cadena descrita hasta ahora, cada nota es a la vez observación y estado. Esto permite describir qué notas suelen sucederse, pero no permite representar un contexto que permanezca mientras cambian las observaciones. Una misma nota puede aparecer en regiones armónicas distintas y un mismo acorde puede admitir varias notas. La nota actual, por tanto, no determina de manera unívoca la organización que se desea estudiar \cite{temperley2007}.
+En la cadena descrita hasta ahora, cada nota es a la vez observación y estado. El modelo describe qué notas suelen sucederse, pero carece de una variable para un contexto que permanezca mientras cambian las observaciones. Una misma nota puede aparecer en regiones armónicas distintas y un mismo acorde puede admitir varias notas. La nota actual, por tanto, no determina de manera unívoca la organización que se desea estudiar \cite{temperley2007}.
 
 Para conservar ese contexto se separan los dos niveles. La nota pasa a ser la observación y una segunda variable representa el contexto latente que evoluciona en el tiempo. El contexto inferido puede estudiarse para determinar si corresponde a una región armónica o estructural, aunque el modelo no le asigna automáticamente una etiqueta musical. El Capítulo~\ref{chap:hmm} formaliza esta idea mediante una cadena de Markov oculta y presenta los algoritmos para evaluar, aprender y decodificar el modelo.
