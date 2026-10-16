@@ -10,7 +10,7 @@ Se fijaron cuatro requisitos comprobables: compartir la representación y las pa
 
 Los criterios se tradujeron en una especificación concreta: clases de altura como observaciones, particiones por obra canónica, selección de configuraciones mediante validación, predicción del siguiente evento como tarea común y NLL por evento como métrica principal. La especificación se versionó antes de la corrida principal. A partir de ella se implementaron la preparación, el ajuste, la reanudación, la evaluación y la auditoría.
 
-La \emph{verificación} contrasta la implementación con la especificación: comprueba que las variantes de una obra permanezcan en la misma partición, que la prueba no intervenga en la selección y que los cuatro modelos puntúen los mismos eventos. La \emph{validación} se apoya en la comparación experimental, el análisis pareado y las sensibilidades para determinar si el sistema responde la pregunta predictiva. La recuperación de estructura musical requiere evidencia distinta.
+La \emph{verificación} contrasta la implementación con la especificación: comprueba que las variantes de una obra permanezcan en la misma partición, que la prueba no intervenga en la selección y que los cuatro modelos asignen probabilidad a los mismos eventos. La \emph{validación} se apoya en la comparación experimental, el análisis pareado y las sensibilidades para determinar si el sistema responde la pregunta predictiva. La recuperación de estructura musical requiere evidencia distinta.
 
 La Figura~\ref{fig:chapter0-design-process} resume el proceso. El retorno representa las revisiones posteriores a la corrida principal: solapamiento de ventanas, capacidad del HMM finito, particiones por obra y presupuesto de inferencia.
 
@@ -49,11 +49,11 @@ La Figura~\ref{fig:chapter0-design-process} resume el proceso. El retorno repres
 
 La tabla de trazabilidad relaciona cada requisito con una decisión y con la evidencia disponible. Los requisitos con evidencia incompleta se conservan como parciales.
 
-\section{De la partitura a una comparación común}
+\section{Diseño e implementación de la solución}
 
 Una partitura contiene alturas, duraciones, voces, compases y otras indicaciones, mientras que los modelos estudiados necesitan una secuencia discreta. La tarea común conserva únicamente las clases de altura, de modo que el HMM finito, el HDP-HMM, el VOMM y el transformador causal compartan el mismo alfabeto. La representación excluye el registro, la duración y parte de la organización métrica.
 
-La representación sólo es común si también lo son las condiciones de evaluación. Colocar un arreglo en entrenamiento y una versión casi idéntica de la misma obra en prueba podría sobrestimar la generalización. Por ello, las particiones mantienen juntas las variantes de cada obra canónica. La auditoría comprueba además que todos los modelos puntúen los mismos eventos y que el símbolo de inicio funcione como contexto, no como una nota adicional.
+La representación sólo es común si también lo son las condiciones de evaluación. Colocar un arreglo en entrenamiento y una versión casi idéntica de la misma obra en prueba podría sobrestimar la generalización. Por ello, las particiones mantienen juntas las variantes de cada obra canónica. La auditoría comprueba además que todos los modelos asignen probabilidad a los mismos eventos y que el símbolo de inicio funcione como contexto, no como una nota adicional.
 
 El HMM finito y el HDP-HMM producen estados latentes; el VOMM y el transformador no ofrecen una trayectoria equivalente. La log-verosimilitud negativa por evento, o NLL, compara la predicción. No evalúa si un estado coincide con una frase, un acorde o una sección. El análisis estructural se mantiene separado y exige anotaciones externas antes de atribuir significado musical a los estados inferidos.
 
@@ -91,7 +91,7 @@ Reconstruir una corrida requiere conservar su configuración, semillas, exclusio
 
 La ocupación latente, la calidad predictiva y la correspondencia con anotaciones son medidas distintas. En la corrida final se evaluó la predicción y se registraron las trayectorias; la ocupación del HDP-HMM no acreditó estabilidad. La correspondencia estructural quedó sin evaluar porque faltaron una referencia anotada y salidas comparables de los cuatro modelos.
 
-\section{Condiciones y límites del experimento}
+\section{Requisitos, restricciones y supuestos}
 
 El diseño descansa en cuatro supuestos. Primero, las clases de altura conservan información suficiente para formular una tarea predictiva común. Segundo, agrupar por identificador canónico reduce la transferencia de variantes entre particiones. Tercero, la NLL por evento compara la capacidad predictiva entre familias. Cuarto, los tiempos observados describen la ejecución realizada, aunque dependan del hardware. Estos supuestos acotan la pregunta predictiva y no convierten su respuesta en una medida de estructura musical.
 
@@ -152,7 +152,7 @@ Considérese un segmento de prueba $y_1,\ldots,y_T$. En cada posición $t$, el m
 \]
 La penalización disminuye cuando el modelo asigna mayor probabilidad a los eventos observados. Por tanto, valores menores indican mejor predicción. Como imagen aproximada, una \emph{perplexity} igual a $q$ equivale a dudar entre $q$ alternativas igualmente probables en cada paso. La distribución real no tiene que ser uniforme. NLL y \emph{perplexity} expresan la misma información en escalas distintas.
 
-Cada \emph{token} puntuado corresponde a un evento musical; ``NLL por \emph{token}'' y ``NLL por evento'' tienen el mismo denominador.
+Cada \emph{token} evaluado corresponde a un evento musical; ``NLL por \emph{token}'' y ``NLL por evento'' tienen el mismo denominador.
 
 La NLL mide la calidad predictiva, el análisis pareado muestra si la diferencia se repite entre obras y los tiempos describen el costo observado. La Tabla~\ref{tab:chapter4-metricas-lectura} reúne estas tres lecturas.
 
@@ -165,13 +165,13 @@ La NLL mide la calidad predictiva, el análisis pareado muestra si la diferencia
 \label{tab:chapter4-metricas-lectura}
 \end{table}
 
-La equivalencia exige que los modelos puntúen exactamente los mismos eventos. El símbolo de inicio funciona como contexto y no cuenta como una nota adicional; el relleno del transformador también queda fuera. Validación y prueba se dividen en segmentos no superpuestos de hasta $128$ eventos, incluida la cola final. Cada nota de prueba se puntúa una vez, con los mismos reinicios de contexto en las cuatro familias.
+La equivalencia exige que los modelos asignen probabilidad exactamente a los mismos eventos. El símbolo de inicio funciona como contexto y no cuenta como una nota adicional; el relleno del transformador también queda fuera. Validación y prueba se dividen en segmentos no superpuestos de hasta $128$ eventos, incluida la cola final. Cada nota de prueba se evalúa una vez, con los mismos reinicios de contexto en las cuatro familias.
 
 El entrenamiento no es idéntico. El transformador utiliza ventanas de hasta $128$ eventos con desplazamiento de $64$, de modo que algunos objetivos aparecen más de una vez; los modelos clásicos recorren cada secuencia sin solapamiento. Además de la arquitectura, cambia así el número efectivo de exposiciones. La Sección~\ref{sec:chapter4-sensibilidad} examina el resultado con desplazamiento de $128$.
 
 La clase de altura conserva la identidad de la nota módulo octava y omite duración, registro, dinámica y buena parte de la organización métrica. El experimento estudia regularidades secuenciales en ese alfabeto compartido.
 
-\section{Construcción del protocolo comparativo}
+\section{Protocolo de validación}
 
 La obra canónica es la unidad de partición. Su identificador normaliza compositor y título; los archivos con el mismo identificador permanecen en un solo conjunto. La regla depende de los metadatos y puede omitir variantes no reconocidas. Con semilla $7$, se reserva el $15\%$ de las obras para prueba y el $10\%$ para validación; el resto se utiliza para entrenamiento.
 

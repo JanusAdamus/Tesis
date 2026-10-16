@@ -596,8 +596,8 @@
 
 \renewcommand{\backmatter}{
     \begin{appendices}
-        \include{chapters/appendixA}
         \include{chapters/appendixB}
+        \include{chapters/appendixA}
     \end{appendices}
     \input{endmatter/personalize}
     \clearpage

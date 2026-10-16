@@ -1,17 +1,23 @@
 \chapter{Introducción y planteamiento del problema}
 \label{chap:planteamiento}
 
-Una obra musical puede describirse con modelos de complejidad muy distinta. En una cadena de Markov o un HMM pequeño, las transiciones y los estados pueden examinarse de manera explícita, a costa de restringir el contexto representado. Un modelo con mayor capacidad puede predecir mejor, pero también exige más decisiones de diseño, recursos de cómputo y cautela al interpretar sus mecanismos. La pregunta es si esa complejidad adicional produce una mejora que justifique su costo.
+Una obra musical puede describirse con modelos de complejidad muy distinta. En una cadena de Markov sencilla, las transiciones entre notas pueden examinarse de manera explícita, a costa de representar sólo un contexto breve. Un modelo con mayor capacidad puede conservar más información y predecir mejor, pero también exige más decisiones de diseño, recursos de cómputo y cautela al interpretar sus mecanismos.
 
-La pregunta central es la siguiente: bajo los mismos datos observables, particiones por obra y criterios de evaluación, ¿la mayor complejidad de un HDP-HMM o de un transformador aporta una mejora sustancial frente a modelos más sencillos? La respuesta considera el desempeño predictivo, el costo computacional, la interpretabilidad y las condiciones de reproducción. El problema tiene dos componentes: predecir el siguiente evento musical y describir contextos latentes dentro de una obra. Ambos se analizan por separado.
+\section{Problema y pregunta de investigación}
 
-El objetivo general es diseñar, implementar y validar un sistema reproducible para comparar cuatro familias: HMM finito, HDP-HMM truncado, VOMM y transformador causal. Los cuatro modelos comparten la representación, las particiones por obra y los eventos puntuados. El protocolo también registra el tiempo, el dispositivo y la complejidad de cada ejecución.
+La mayor complejidad sólo resulta útil si la mejora obtenida compensa lo que cuesta incorporarla. Por ello, no basta con ordenar los modelos por una sola cifra: también importa cuánto cómputo requieren, qué puede inspeccionarse en sus resultados y bajo qué condiciones puede repetirse la comparación.
 
-El sistema integra la preparación de datos, el ajuste, la auditoría y la evaluación. Su ejecución completa aporta la base para estudiar la viabilidad tecnológica; los tiempos medidos sustentan una estimación económica paramétrica. La dimensión social se delimita, pues no se realizó una evaluación con usuarios.
+La pregunta central es la siguiente: bajo los mismos datos observables, particiones por obra y criterios de evaluación, ¿los modelos más complejos aportan una mejora sustancial frente a alternativas más sencillas? La respuesta considera el desempeño predictivo, el costo computacional, la interpretabilidad y las condiciones de reproducción. El problema tiene dos componentes: predecir el siguiente evento musical y describir contextos latentes dentro de una obra. Ambos se analizan por separado, pues una buena predicción no demuestra por sí sola que los estados internos correspondan a frases, acordes o secciones.
 
-La obra constituye la unidad de inferencia para el contraste predictivo. Los componentes internos de las cuatro familias no se equiparan: las interpretaciones musicales de estados o patrones requieren anotaciones externas.
+\section{Objetivo, solución y alcance}
 
-El alcance se restringe a secuencias de clases de altura extraídas de una muestra de PDMX y a las configuraciones y recursos utilizados. La validación final cubre la predicción del siguiente evento. La correspondencia entre estados y estructura musical quedó sin evaluar por falta de anotaciones de referencia y de salidas comparables para los cuatro modelos.
+El objetivo general es diseñar, implementar y validar un sistema reproducible para comparar cuatro familias. Se estudian un modelo oculto de Markov con un número fijo de estados (HMM, por sus siglas en inglés), un HMM basado en el proceso de Dirichlet jerárquico y limitado mediante una cota computacional (HDP-HMM), un modelo de Markov de orden variable (VOMM) y un transformador causal. Los cuatro comparten la representación, las particiones por obra y los eventos de prueba a los que asignan probabilidad. El protocolo registra además el tiempo, el dispositivo y la complejidad de cada ejecución.
+
+El sistema integra la preparación de los datos, el ajuste, la auditoría y la evaluación. Su ejecución completa permite examinar la viabilidad tecnológica; los tiempos medidos sustentan una estimación económica bajo un escenario de tarifas explícito. La dimensión social se delimita, pues no se realizó una evaluación con usuarios.
+
+La obra constituye la unidad de análisis del contraste predictivo. Los componentes internos de las cuatro familias no se equiparan: las interpretaciones musicales de estados o patrones requieren anotaciones externas.
+
+El alcance se restringe a secuencias de clases de altura extraídas de una muestra de PDMX, una colección pública de partituras digitales, y a las configuraciones y recursos utilizados \cite{long2024pdmx}. La validación final cubre la predicción del siguiente evento. La correspondencia entre estados y estructura musical quedó sin evaluar por falta de anotaciones de referencia y de salidas comparables para los cuatro modelos.
 
 \section{Organización de la tesis}
 

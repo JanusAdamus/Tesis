@@ -17,7 +17,7 @@ La elección de $S$ determina la dimensión de la distribución inicial $\boldsy
 \[
 (\text{fundamental},\text{plantilla armónica}).
 \]
-El primer componente indica la fundamental y el segundo la cualidad armónica.
+La \emph{fundamental} es la clase de altura que sirve como referencia y da nombre al acorde. La plantilla, o cualidad armónica, indica el patrón de intervalos construido sobre ella: por ejemplo, mayor, menor o disminuido. Así, el par $(C,\mathrm{Maj})$ representa un acorde de Do mayor, mientras que $(C,\mathrm{min})$ representa uno de Do menor.
 
 Sea
 \[
@@ -40,7 +40,7 @@ el conjunto de clases de altura fundamentales. Sea además
 \]
 una familia de plantillas que distingue triadas, séptimas, suspensiones y extensiones.
 
-Se define entonces
+Cada par formado por una fundamental y una plantilla constituye una posibilidad distinta. Se define entonces
 \[
 S=\mathcal{R}\times\mathcal{Q}.
 \]
@@ -60,45 +60,17 @@ La estructura del HMM del capítulo anterior se conserva, pero cambia el espacio
 \]
 La propiedad de Markov no cambia. El siguiente estado depende del estado presente y la observación depende del estado latente actual. La diferencia es que ya no se fija de antemano un número exacto de contextos.
 
-\begin{Definicion}
-Una \emph{cadena de Markov oculta infinita} está determinada por dos procesos estocásticos en tiempo discreto
+No hace falta redefinir el HMM completo. Se conservan los dos procesos y las independencias condicionales del Capítulo~\ref{chap:hmm}; sólo cambia el conjunto de valores posibles de $X_t$. La distribución inicial $\boldsymbol{\pi}=(\pi_i)_{i\geq 1}$ y cada renglón de la matriz de transición $\mathbf{A}=(a_{ij})_{i,j\geq 1}$ distribuyen ahora su probabilidad sobre una colección numerable. Las emisiones $b_j(v)$ siguen asignando probabilidades a las observaciones $v\in\mathcal{V}$. En particular,
 \[
-(X_t)_{t\geq 1}, \qquad (Y_t)_{t\geq 1},
-\]
-donde $(X_t)$ toma valores en $\mathbb{N}$ y $(Y_t)$ toma valores en un espacio de observaciones $\mathcal{V}$. Se fija una distribución inicial
-\[
-\boldsymbol{\pi}=(\pi_i)_{i\geq 1},
-\]
-una matriz de transición infinita
-\[
-\mathbf{A}=(a_{ij})_{i,j\geq 1},
-\]
-y una familia de distribuciones de emisión
-\[
-\mathbf{B}=(b_j)_{j\geq 1},
-\]
-de modo que, para todo $i,j\geq 1$ y todo $v\in\mathcal{V}$,
-\[
-P(X_1=i\mid \boldsymbol{\pi})=\pi_i,
-\]
-\[
-P(X_t=j\mid X_{t-1}=i,\mathbf{A})=a_{ij}, \quad t\geq 2,
+P(X_t=j\mid X_{t-1}=i)=a_{ij},
 \qquad
-P(Y_t=v\mid X_t=j,\mathbf{B})=b_j(v), \quad t\geq 1,
+P(Y_t=v\mid X_t=j)=b_j(v),
 \]
-con
-\[
-\sum_{i=1}^{\infty}\pi_i=1,
-\qquad
-\sum_{j=1}^{\infty}a_{ij}=1,
-\qquad
-\sum_{v\in\mathcal{V}}b_j(v)=1.
-\]
-\end{Definicion}
+y cada distribución continúa sumando uno. El adjetivo ``infinita'' se refiere al inventario potencial de estados, no a la longitud de la secuencia ni al número de estados que deban aparecer en ella.
 
-Al ampliar el espacio de estados surge una dificultad concreta. Cada renglón de $\mathbf{A}$ debe asignar probabilidad a la misma colección, de modo que el estado $j$ conserve su significado sin importar el estado de origen. El proceso de Dirichlet jerárquico establece esa referencia común mediante una distribución global. En las cadenas ocultas, la construcción resultante se denomina HMM basado en un proceso de Dirichlet jerárquico, o HDP-HMM, y constituye una forma de cadena de Markov oculta infinita, abreviada iHMM \cite{beal2002,teh2006}.
+Al ampliar el espacio de estados surge una dificultad concreta. Cada renglón de $\mathbf{A}$ debe asignar probabilidad a la misma colección, de modo que la etiqueta $j$ se refiera al mismo estado sin importar el estado de origen. El proceso de Dirichlet jerárquico resuelve este problema mediante una distribución global compartida por la distribución inicial y por todos los renglones de transición. En las cadenas ocultas, la construcción resultante se denomina HMM basado en un proceso de Dirichlet jerárquico, o HDP-HMM, y constituye una forma de cadena de Markov oculta infinita, abreviada iHMM \cite{beal2002,teh2006}.
 
-La distribución global puede imaginarse como una barra de longitud uno que se rompe sucesivamente. El primer fragmento recibe peso $\beta_1$; del resto se obtiene $\beta_2$, y así sucesivamente. En conjunto, los fragmentos forman una distribución de probabilidad sobre los estados potenciales. En lo que sigue, $DP(c,H)$ denota un proceso de Dirichlet con concentración $c$ y medida base $H$; la abreviatura $i.i.d.$ indica variables independientes con la misma distribución. Formalmente, se escribe
+La distribución global puede imaginarse como una barra de longitud uno que se rompe sucesivamente. El primer fragmento recibe peso $\beta_1$; del resto se obtiene $\beta_2$, y así sucesivamente. En conjunto, los fragmentos forman una distribución de probabilidad sobre los estados potenciales. En lo que sigue, $DP(c,H)$ denota un proceso de Dirichlet con concentración $c$ y medida base $H$. Los pesos auxiliares $v_k$ son independientes y siguen la misma distribución beta. Formalmente, se escribe
 \[
 \beta=\sum_{k=1}^{\infty}\beta_k\delta_k,
 \]
@@ -106,7 +78,7 @@ donde
 \[
 \beta_k=v_k\prod_{\ell=1}^{k-1}(1-v_{\ell}),
 \qquad
-v_k \overset{\mathrm{i.i.d.}}{\sim}\mathrm{Beta}(1,\gamma),
+v_k \sim\mathrm{Beta}(1,\gamma),
 \qquad k\geq 1,
 \]
 y se supone que
@@ -185,6 +157,8 @@ La Figura~\ref{fig:ihmm-truncamiento} separa las dos ideas que suele confundir e
 
 Una computadora no puede almacenar una matriz con infinitos renglones y columnas. La implementación introduce entonces una cota $K$ y aproxima la colección numerable mediante los estados $1,\ldots,K$ \cite{ishwaran2001,fox2011,vangael2008}. El objetivo no es afirmar que la obra tiene exactamente $K$ contextos, sino elegir una cota suficientemente alta y permitir que la inferencia deje estados sin usar.
 
+Tanto el estado siguiente como la clase de altura observada son variables categóricas: en cada posición toman un valor dentro de una lista finita. Si $p$ es el vector que asigna una probabilidad a cada opción, se escribirá $\mathrm{Cat}(p)$ para su distribución categórica. Esta notación se utiliza a continuación para separar la elección de una categoría del vector de probabilidades que la gobierna.
+
 \begin{Definicion}
 Fijado un entero $K\geq 2$, un \emph{HDP-HMM truncado} con espacio observable discreto $\mathcal{V}=\{1,\dots,V\}$ queda determinado por las variables aleatorias
 \[
@@ -206,7 +180,7 @@ A_i\mid \beta \sim \mathrm{Dir}(\alpha\beta+\kappa e_i), \qquad i=1,\dots,K,
 \[
 \phi_i\sim \mathrm{Dir}\left(\frac{\eta}{V},\dots,\frac{\eta}{V}\right), \qquad i=1,\dots,K,
 \]
-donde $e_i$ denota el $i$-ésimo vector canónico de $\mathbb{R}^K$. Si $\mathrm{Cat}(p)$ denota la distribución categórica con vector de probabilidades $p$, la cadena latente y las observaciones satisfacen
+donde $e_i$ denota el $i$-ésimo vector canónico de $\mathbb{R}^K$. La cadena latente y las observaciones satisfacen
 \[
 X_1\mid \boldsymbol{\pi}\sim \mathrm{Cat}(\boldsymbol{\pi}),
 \qquad
@@ -223,13 +197,13 @@ Una vez fijado $K$, las transiciones y emisiones vuelven a representarse mediant
 
 En los experimentos se denomina \emph{estado efectivo} a cualquiera de los estados presentes en la trayectoria inferida. Su conteo indica qué parte de la cota disponible ocupa el modelo. No mide la calidad musical: dos estados efectivos pueden separar contextos útiles o dividir arbitrariamente una misma región, distinción que exige interpretación o anotaciones externas.
 
-Las observaciones son clases de altura y el iHMM conserva un papel conceptual. La implementación emplea un HDP-HMM truncado, ajustado con los datos de las obras y comparado con el HMM finito. Antes de consolidar el diseño experimental se examinaron corridas disponibles sobre una pieza extensa y dos conjuntos de obras. Esas corridas describen el comportamiento de las trayectorias; la validación predictiva se realiza después con un protocolo común.
+Las observaciones son clases de altura y el iHMM conserva un papel conceptual. La implementación emplea un HDP-HMM truncado, ajustado con los datos de las obras y comparado con el HMM finito. Antes de consolidar el diseño experimental se examinaron simulaciones anteriores cuyas tablas y figuras aún se conservan: una corresponde a una pieza extensa y las demás a dos conjuntos de obras. Estas comprobaciones describen el comportamiento de las trayectorias; la validación predictiva se realiza después con un protocolo común.
 
 \section{Comprobación preliminar en una obra de referencia}
 
 El caso ilustrativo es el tercer movimiento de la Sonata núm.~14 de Beethoven, una de las piezas extensas del corpus, con $4133$ notas y $201$ compases. Su longitud hace visibles las diferencias entre trayectorias que después se resumen. El análisis se limita a esta obra y no constituye evidencia general a favor de un modelo.
 
-Las tablas y figuras proceden de exportaciones conservadas de corridas anteriores. El repositorio contiene el código que las generó, pero no sus CSV primarios; las cifras pueden cotejarse con las exportaciones incluidas, aunque una reproducción completa exige recuperar esos archivos.
+Las tablas y figuras proceden de exportaciones conservadas de corridas anteriores. El repositorio contiene el código que las generó, pero no los archivos tabulares primarios de valores separados por comas (CSV). Las cifras pueden cotejarse con las exportaciones incluidas, aunque una reproducción completa exige recuperar esos archivos.
 
 La Tabla~\ref{tab:single-anchor} compara log-verosimilitud, estados ocupados y segmentos contiguos de la trayectoria. Un segmento es una sucesión de posiciones consecutivas a las que el modelo asigna el mismo estado; un cambio de estado inicia el siguiente. Para una misma secuencia, una log-verosimilitud mayor, es decir, menos negativa, indica que el modelo asigna más probabilidad a las observaciones. La magnitud depende de la longitud de la pieza, de modo que estos valores no deben compararse directamente entre obras de tamaños distintos.
 
@@ -250,7 +224,7 @@ La comparación se extiende primero a seis piezas breves para averiguar si el pa
 
 La comparación controlada utiliza las seis piezas breves de la Tabla~\ref{tab:corpus-clasico-limitado}. Las observaciones son clases de altura. Para el HDP-HMM se fija $K=12$, con $\alpha=8$, $\alpha_0=4$, $\gamma=2$, $\eta=1$ y $\kappa=0$. Se realizan veinte iteraciones de inferencia, se descartan las diez primeras como calentamiento y se utiliza la semilla $7$.
 
-La configuración no procede de una búsqueda exhaustiva de hiperparámetros. Tampoco se conservaron trazas ni varias cadenas para evaluar la estabilidad de la inferencia. Esta sección describe, por tanto, las corridas disponibles; no aporta una comprobación de convergencia ni reemplaza los artefactos primarios faltantes.
+La configuración no procede de una búsqueda exhaustiva de hiperparámetros. Tampoco se conservaron trazas ni varias cadenas para evaluar la estabilidad de la inferencia. Esta sección describe, por tanto, las simulaciones cuyos resultados se conservan; no aporta una comprobación de convergencia ni reemplaza los artefactos primarios faltantes.
 
 \begin{table}[H]
 \centering
@@ -302,7 +276,7 @@ La Figura~\ref{fig:logverosimilitud-clasica} muestra los valores que dan lugar a
 \label{fig:logverosimilitud-clasica}
 \end{figure}
 
-La Figura~\ref{fig:ganancia-y-complejidad-clasica} relaciona ajuste y ocupación. En estas corridas, el HDP-HMM obtiene mayor log-verosimilitud con menos estados. La ocupación es más compacta; la calidad musical de la trayectoria requiere otro tipo de evidencia.
+La Figura~\ref{fig:ganancia-y-complejidad-clasica} relaciona ajuste y ocupación. En estas simulaciones, el HDP-HMM obtiene mayor log-verosimilitud con menos estados. La ocupación es más compacta; la calidad musical de la trayectoria requiere otro tipo de evidencia.
 
 \begin{figure}[H]
 \centering

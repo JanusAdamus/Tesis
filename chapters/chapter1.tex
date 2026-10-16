@@ -7,9 +7,11 @@ Antes de asignar probabilidades hay que decidir qué cuenta como un evento. Una 
 
 \section{De la melodía a una secuencia}
 
+Una nota escrita reúne varias propiedades. La altura distingue sonidos graves y agudos; el registro sitúa la nota en una octava; la duración indica cuánto se prolonga, y su posición dentro del compás aporta información métrica. Una melodía organiza estas propiedades en el tiempo. La representación utilizada aquí conserva únicamente el orden de los ataques y la identidad de la altura módulo octava. Esta reducción permite comparar los modelos, pero no pretende agotar lo que constituye una melodía \cite{temperley2007,pearce2012}.
+
 La representación parte de partituras simbólicas. Cada nota seleccionada por el preprocesamiento cuenta como un evento y el índice $n$ indica su lugar en la secuencia. Avanzar de $n$ a $n+1$ no supone que entre ambos eventos transcurra siempre la misma duración física. La comparación experimental del Capítulo~\ref{chap:comparacion-final} utiliza la misma representación para predecir la siguiente clase de altura. Quedan fuera la duración, el registro, la dinámica y parte de la organización métrica.
 
-La altura puede conservarse con distinto grado de detalle. Una nota con registro, como $C_4$, distingue la octava; una clase de altura agrupa notas equivalentes módulo octava y las representa con un mismo símbolo, como $C$. Para la comparación común se utilizan las doce clases de altura del sistema cromático occidental. La Figura~\ref{fig:teclado-octava} muestra ese alfabeto dentro de una octava del teclado.
+La altura puede conservarse con distinto grado de detalle. Una nota con registro, como $C_4$, distingue la octava; una \emph{clase de altura} agrupa las notas que reciben el mismo nombre en octavas diferentes y las representa con un solo símbolo, como $C$. Para la comparación común se utilizan las doce clases de altura del sistema cromático occidental. La Figura~\ref{fig:teclado-octava} muestra ese alfabeto dentro de una octava del teclado.
 
 \begin{figure}[h]
 \centering
@@ -42,15 +44,19 @@ La altura puede conservarse con distinto grado de detalle. Una nota con registro
 \label{fig:teclado-octava}
 \end{figure}
 
-Sea $S$ el alfabeto finito elegido. Una melodía queda representada como una sucesión
+Sea $S$ el alfabeto finito elegido. Por ejemplo, en el experimento $S$ contiene las doce clases de altura. Una melodía queda representada como una sucesión
 \[
 (X_n)_{n\geq 1}, \qquad X_n\in S,
 \]
-donde $X_n$ es la clase de altura observada en la posición $n$. Tratar $X_n$ como variable aleatoria no implica que la melodía carezca de organización musical. La distribución de probabilidad sólo expresa qué continuaciones admite el modelo y qué peso asigna a cada una.
+donde $X_n$ es la clase de altura observada en la posición $n$. Los índices comienzan en $1$ por convención matemática; no representan compases ni unidades de tiempo físico. Tratar $X_n$ como variable aleatoria no implica que la melodía carezca de organización musical. La distribución de probabilidad sólo expresa qué continuaciones admite el modelo y qué peso asigna a cada una.
 
 \section{Dependencia local y cadenas de Markov}
 
-El modelo más simple asignaría a cada posición la misma distribución, con independencia de las notas anteriores. Esa hipótesis no representa la continuidad local que motivó la secuencia. En el extremo opuesto, condicionar cada nota a toda la historia previa produce un número de contextos que crece rápidamente y resulta difícil de estimar con datos limitados. La cadena de Markov de primer orden adopta una posición intermedia: conserva la nota presente y descarta el resto del pasado al calcular la siguiente transición.
+El modelo más simple asignaría a cada posición la misma distribución, con independencia de las notas anteriores. Esa hipótesis no representa la continuidad local que motivó la secuencia. En el extremo opuesto, condicionar cada nota a toda la historia previa produce un número de contextos que crece rápidamente y resulta difícil de estimar con datos limitados. La cadena de Markov de \emph{primer orden} adopta una posición intermedia: para calcular la siguiente transición conserva un solo evento anterior, la nota presente. Aquí ``orden'' indica cuántos pasos del pasado se utilizan, no una jerarquía entre modelos.
+
+Esta idea puede expresarse como una independencia condicional. Una vez conocida la nota actual, las notas anteriores dejan de modificar la distribución que el modelo asigna a la siguiente. Esa afirmación es la propiedad de Markov; la definición formal sólo precisa para qué secuencias y valores debe cumplirse.
+
+Una cadena de Markov también puede definirse sobre un conjunto numerable. Aquí se enuncia el caso finito porque el alfabeto observable del experimento contiene doce clases de altura.
 
 \begin{Definicion}
 Sea $(\Omega,\mathcal{F},\mathbb{P})$ un espacio de probabilidad. Una sucesión de variables aleatorias $(X_n)_{n\geq 1}$ con valores en un conjunto finito $S$ es una \emph{cadena de Markov} si, para todo $n\geq 1$ y para cualesquiera $i_1,\ldots,i_n,j\in S$ con probabilidad condicionante positiva,
@@ -61,7 +67,7 @@ P(X_{n+1}=j\mid X_n=i_n).
 \]
 \end{Definicion}
 
-En el modelo melódico de primer orden, esta igualdad significa que la nota actual resume el contexto utilizado para predecir la siguiente. La música puede contener motivos, frases y dependencias a mayor distancia, pero la cadena no los representa de forma directa. Se trata de una simplificación deliberada cuyo efecto puede evaluarse al compararla con modelos que conservan más contexto.
+En el modelo melódico de primer orden, esta igualdad significa que la nota actual resume el contexto utilizado para predecir la siguiente. Una obra, sin embargo, puede repetir un motivo ---un patrón breve reconocible--- o desarrollar una frase a lo largo de varios eventos. Esas dependencias de mayor alcance no quedan representadas de forma directa. La propiedad de Markov es, por tanto, una simplificación deliberada cuyo efecto puede evaluarse al compararla con modelos que conservan más contexto.
 
 Si la cadena es homogénea, la probabilidad de pasar de $i$ a $j$ no depende de $n$ y se denota por
 \[
@@ -75,9 +81,9 @@ P_{ij}\geq 0,
 \]
 La matriz $\mathbf{P}=(P_{ij})_{i,j\in S}$ se denomina \emph{matriz de transición} \cite{ross2014}. Cada renglón responde una pregunta concreta: dada la nota representada por $i$, ¿cómo distribuye el modelo la probabilidad entre las notas que pueden seguirla?
 
-Cuando se observa una secuencia y no se impone regularización, una estimación elemental cuenta cuántas veces aparece cada par consecutivo $(i,j)$ y divide por el número de transiciones que parten de $i$. Este cociente es el estimador de máxima verosimilitud de $P_{ij}$. Si un par no aparece, su estimación es cero; con corpus pequeños, esa ausencia puede reflejar falta de datos y no imposibilidad musical. Los mecanismos probabilísticos de los capítulos posteriores buscan precisamente que la estimación no dependa sólo de cada conteo aislado.
+Cuando se observa una secuencia y no se impone regularización, una estimación elemental cuenta cuántas veces aparece cada par consecutivo $(i,j)$ y divide por el número de transiciones que parten de $i$. Este cociente es el estimador de máxima verosimilitud de $P_{ij}$. Si un par no aparece, su estimación es cero; en una colección pequeña de partituras, esa ausencia puede reflejar falta de datos y no imposibilidad musical. Los mecanismos probabilísticos de los capítulos posteriores buscan precisamente que la estimación no dependa sólo de cada conteo aislado.
 
-La matriz también describe el comportamiento agregado de la cadena. Un vector de probabilidad $\boldsymbol{\pi}$ es estacionario si
+La matriz también permite preguntar qué proporción de tiempo dedicaría la cadena a cada símbolo si se la dejara evolucionar durante mucho tiempo. Un vector de probabilidad $\boldsymbol{\pi}$ es estacionario si
 \[
 \boldsymbol{\pi}=\boldsymbol{\pi}\mathbf{P}.
 \]
@@ -89,6 +95,6 @@ Bajo esas condiciones, $\pi_j$ describe la probabilidad a largo plazo del símbo
 
 \section{De la nota observable al contexto latente}
 
-En la cadena descrita hasta ahora, cada nota es a la vez observación y estado. El modelo describe qué notas suelen sucederse, pero carece de una variable para un contexto que permanezca mientras cambian las observaciones. Una misma nota puede aparecer en regiones armónicas distintas y un mismo acorde puede admitir varias notas. La nota actual, por tanto, no determina de manera unívoca la organización que se desea estudiar \cite{temperley2007}.
+En la cadena descrita hasta ahora, cada nota es a la vez observación y estado. El modelo describe qué notas suelen sucederse, pero carece de una variable para un contexto que permanezca mientras cambian las observaciones. Un acorde organiza varias notas alrededor de una fundamental y una cualidad; una región tonal prolonga durante un tramo la referencia a un centro y a ciertas relaciones armónicas. Por ello, una misma clase de altura puede intervenir en acordes o regiones distintas, y un mismo acorde puede admitir varias notas. La nota actual no determina de manera unívoca la organización que se desea estudiar \cite{temperley2007}.
 
-Para conservar ese contexto se separan los dos niveles. La nota pasa a ser la observación y una segunda variable representa el contexto latente que evoluciona en el tiempo. El contexto inferido puede estudiarse para determinar si corresponde a una región armónica o estructural, aunque el modelo no le asigna automáticamente una etiqueta musical. El Capítulo~\ref{chap:hmm} formaliza esta idea mediante una cadena de Markov oculta y presenta los algoritmos para evaluar, aprender y decodificar el modelo.
+Para conservar ese contexto se separan los dos niveles. La nota pasa a ser la observación y una segunda variable representa el contexto latente que evoluciona en el tiempo. El contexto inferido puede compararse con acordes, regiones tonales, frases u otras divisiones de la obra, aunque el modelo no le asigna automáticamente ninguna de esas etiquetas. El Capítulo~\ref{chap:hmm} formaliza esta idea mediante una cadena de Markov oculta y presenta los algoritmos para evaluar, aprender y decodificar el modelo.
